@@ -11,3 +11,42 @@
 *.lai
 *.la
 *.a
+
+
+# VS Files
+*.[Oo]bj
+*.user
+*.aps
+*.pch
+*.vspscc
+*.vssscc
+*_i.c
+*_p.c
+*.ncb
+*.suo
+*.tlb
+*.tlh
+*.bak
+*.[Cc]ache
+*.ilk
+*.log
+*.lib
+*.sbr
+*.sdf
+*.opensdf
+*.unsuccessfulbuild
+ipch/
+obj/
+[Bb]in
+[Dd]ebug*/
+[Rr]elease*/
+Ankh.NoLoad
+
+# Project files
+[Bb]uild/
+
+# Office Temp Files
+~$*
+
+# VS Database Projects
+*.dbmdl
