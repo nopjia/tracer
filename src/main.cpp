@@ -1,7 +1,17 @@
 #include <iostream>
+
+// GL
 #include <gl3w.h>
 #include <freeglut.h>
 
+// CUDA
+#include <cuda.h>
+#include <cuda_runtime.h>
+#include <cuda_runtime_api.h>
+#include <cuda_gl_interop.h>
+#include <helper_cuda.h>
+#include <helper_cuda_gl.h>
+#include <helper_functions.h>
 
 // constants
 #define WINDOW_W 640
