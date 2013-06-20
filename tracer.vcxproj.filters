@@ -16,4 +16,12 @@
       <UniqueIdentifier>{c688fbad-0e2b-4180-b3de-c5d8f67b976a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\FullScreenQuad.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\common.h">
+      <Filter>src</Filter>
+    </ClInclude>
+  </ItemGroup>
 </Project>

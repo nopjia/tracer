@@ -1,29 +1,19 @@
-#include <iostream>
-
-// GL
-#include <gl3w.h>
-#include <freeglut.h>
-
-// CUDA
-#include <cuda.h>
-#include <cuda_runtime.h>
-#include <cuda_runtime_api.h>
-#include <cuda_gl_interop.h>
-#include <helper_cuda.h>
-#include <helper_cuda_gl.h>
-#include <helper_functions.h>
-
-// constants
-#define WINDOW_W 640
-#define WINDOW_H 480
+#include "common.h"
+#include "FullScreenQuad.h"
 
 namespace {
   int mouseX, mouseY;
   int mouseButtons = 0;   // 0x1 left, 0x2 middle, 0x4 right
+
+  GLuint pbo;               // pbo for CUDA and openGL
+  GLuint result_texture;    // render result copied to this openGL texture
+  FullScreenQuad* fullScreenQuad = new FullScreenQuad();
 }
 
 // global methods
 void initGL();
+void initCUDA (int argc, char **argv);
+void initCUDAMemory();
 void resize(int width, int height);
 void draw();
 void keyboard(unsigned char key, int x, int y);
@@ -61,16 +51,21 @@ int main(int argc, char **argv) {
     return -1;
   }
 
-  initGL();
+  initGL();  
+  initCUDA(argc, argv);
+  initCUDAMemory();
   
   glutMainLoop();
+  cudaThreadExit();
+
 
   return 0;
 }
 
 void initGL() {  
   std::cout << "OpenGL " << glGetString(GL_VERSION) 
-    << "\nGLSL " << glGetString(GL_SHADING_LANGUAGE_VERSION);
+    << "\nGLSL " << glGetString(GL_SHADING_LANGUAGE_VERSION)
+    << std::endl;
   
   // back face culling
   //glEnable(GL_CULL_FACE);
@@ -86,33 +81,23 @@ void initGL() {
   //glClearDepth(1.0f);
 
   glEnable(GL_TEXTURE_2D);
-
   //glDisable(GL_LIGHTING);
-  //glEnable(GL_TEXTURE_2D);
-  //glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
   glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
+
+  
+  fullScreenQuad->begin();
 }
 
 void resize(int width, int height) {  
   glViewport(0, 0, width, height);
-
-  /*
-  // reset projection matrix
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-
-  // calculate aspect ratio
-  gluPerspective(CAM_FOV, (GLfloat)width/(GLfloat)height, CAM_NEAR, CAM_FAR);
-
-  // reset modelview matrix
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-  */
 }
 
 void draw() {
   glClear(GL_COLOR_BUFFER_BIT);
+
+  fullScreenQuad->display();
+
   glutSwapBuffers();
 }
 
@@ -153,4 +138,53 @@ void motion(int x, int y) {
 
   mouseX = x;
   mouseY = y;
+}
+
+void initCUDA (int argc, char **argv)
+{
+  if ( checkCmdLineFlag(argc, (const char **)argv, "device"))
+  {
+    gpuGLDeviceInit(argc, (const char **)argv);
+  }
+  else 
+  {
+    cudaGLSetGLDevice (gpuGetMaxGflopsDeviceId());
+  }
+}
+
+void initCUDAMemory()
+{
+  uint image_width = WINDOW_W;
+  uint image_height = WINDOW_H;
+
+  // initialize the PBO for transferring data from CUDA to openGL
+  uint num_texels = image_width * image_height;
+  uint size_tex_data = sizeof(GLubyte) * num_texels * 4;
+  void *data = malloc(size_tex_data);
+
+  // create buffer object
+  glGenBuffers(1, &pbo);
+  glBindBuffer(GL_ARRAY_BUFFER, pbo);
+  glBufferData(GL_ARRAY_BUFFER, size_tex_data, data, GL_DYNAMIC_DRAW);
+  free(data);
+
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+  // register this buffer object with CUDA
+  checkCudaErrors(cudaGLRegisterBufferObject(pbo));
+  //CUT_CHECK_ERROR_GL();
+
+  // create the texture that we use to visualize the ray-tracing result
+  glGenTextures(1, &result_texture);
+  glBindTexture(GL_TEXTURE_2D, result_texture);
+
+  // set basic parameters
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+  // buffer data
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+  //CUT_CHECK_ERROR_GL();
 }
