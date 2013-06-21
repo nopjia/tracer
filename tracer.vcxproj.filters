@@ -47,4 +47,9 @@
       <Filter>shaders</Filter>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="src\raytrace.cu">
+      <Filter>src</Filter>
+    </CudaCompile>
+  </ItemGroup>
 </Project>

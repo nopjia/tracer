@@ -25,6 +25,7 @@ void mouse(int button, int state, int x, int y);
 void motion(int x, int y);
 void raytrace();
 
+extern "C" void raytrace(uint *pbo_out, uint w, uint h);
 
 int main(int argc, char **argv) {
   glutInit(&argc, argv);
@@ -201,7 +202,9 @@ void initCUDAMemory()
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
   SDK_CHECK_ERROR_GL();
 
+  // unbind
   glBindTexture(GL_TEXTURE_2D, 0);
+  glActiveTexture(GL_TEXTURE0 + UNUSED_TEXTURE);
 }
 
 void raytrace()
@@ -216,13 +219,17 @@ void raytrace()
 	//	make_float3(light_color[0],light_color[1],light_color[2]),
 	//	scene_aabbox_min , scene_aabbox_max);
 
+  raytrace(out_data, image_width, image_height);
+
 	checkCudaErrors(cudaGLUnmapBufferObject(pbo));
 
 	// download texture from destination PBO
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo);
+  glActiveTexture(GL_TEXTURE0 + RENDER_TEXTURE);
 	glBindTexture(GL_TEXTURE_2D, result_texture);
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, image_width, image_height, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+  glActiveTexture(GL_TEXTURE0 + UNUSED_TEXTURE);
 
 	SDK_CHECK_ERROR_GL();
 }

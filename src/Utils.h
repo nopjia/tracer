@@ -1,8 +1,18 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-// GLEW and GLFW headers
+// GL
 #include <gl3w.h>
+#include <freeglut.h>
+
+// CUDA
+#include <cuda.h>
+#include <cuda_runtime.h>
+#include <cuda_runtime_api.h>
+#include <cuda_gl_interop.h>
+#include <helper_cuda.h>
+#include <helper_cuda_gl.h>
+#include <helper_functions.h>
 
 // GLM libraries
 #include <glm/glm.hpp>
@@ -29,6 +39,7 @@
 #include <limits>
 #include <algorithm>
 
+typedef unsigned char byte;
 typedef unsigned char uchar;
 typedef unsigned int uint;
 
