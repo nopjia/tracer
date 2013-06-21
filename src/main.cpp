@@ -57,7 +57,7 @@ int main(int argc, char **argv) {
     return -1;
   }
 
-  initGL();  
+  initGL();
   initCUDA(argc, argv);
   initCUDAMemory();
   
@@ -72,7 +72,7 @@ void initGL() {
   std::cout << "OpenGL " << glGetString(GL_VERSION) 
     << "\nGLSL " << glGetString(GL_SHADING_LANGUAGE_VERSION)
     << std::endl;
-  
+
   // back face culling
   //glEnable(GL_CULL_FACE);
   //glCullFace(GL_BACK);
@@ -86,7 +86,7 @@ void initGL() {
   //glDepthRange(0.0f, 1.0f);  
   //glClearDepth(1.0f);
 
-  glEnable(GL_TEXTURE_2D);
+  //glEnable(GL_TEXTURE_2D);
   //glDisable(GL_LIGHTING);
 
   glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
@@ -102,6 +102,7 @@ void resize(int width, int height) {
 void draw() {
   glClear(GL_COLOR_BUFFER_BIT);
 
+  raytrace();
   fullScreenQuad->display();
 
   glutSwapBuffers();
@@ -165,17 +166,25 @@ void initCUDAMemory()
   uint size_tex_data = sizeof(GLubyte) * num_texels * 4;
   void *data = malloc(size_tex_data);
 
+  // test init buffer
+  for (int i=0; i<size_tex_data; i+=4) {
+    uchar *datam = (uchar*)data;
+    datam[i+0] = 0;
+    datam[i+1] = 0;
+    datam[i+2] = 255.0 * i / (float)size_tex_data;
+    datam[i+3] = 255;
+  }
+
   // create buffer object
   glGenBuffers(1, &pbo);
   glBindBuffer(GL_ARRAY_BUFFER, pbo);
   glBufferData(GL_ARRAY_BUFFER, size_tex_data, data, GL_DYNAMIC_DRAW);
   free(data);
-
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
   // register this buffer object with CUDA
   checkCudaErrors(cudaGLRegisterBufferObject(pbo));
-  //CUT_CHECK_ERROR_GL();
+  SDK_CHECK_ERROR_GL();
 
   // create the texture that we use to visualize the ray-tracing result
   glActiveTexture(GL_TEXTURE0 + RENDER_TEXTURE);
@@ -190,28 +199,30 @@ void initCUDAMemory()
 
   // buffer data
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-  //CUT_CHECK_ERROR_GL();
+  SDK_CHECK_ERROR_GL();
+
+  glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-//void raytrace()
-//{
-//	unsigned int* out_data;
-//	checkCudaErrors(cudaGLMapBufferObject((void**)&out_data, pbo));
-//
-//	//RayTraceImage(out_data, image_width, image_height, total_number_of_triangles, 
-//	//	a, b, c, 
-//	//	campos, 
-//	//	make_float3(light_x,light_y,light_z),
-//	//	make_float3(light_color[0],light_color[1],light_color[2]),
-//	//	scene_aabbox_min , scene_aabbox_max);
-//
-//	checkCudaErrors(cudaGLUnmapBufferObject( pbo));
-//
-//	// download texture from destination PBO
-//	glBindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, pbo);
-//	glBindTexture(GL_TEXTURE_2D, result_texture);
-//	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, image_width, image_height, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
-//	glBindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
-//
-//	//CUT_CHECK_ERROR_GL();
-//}
+void raytrace()
+{
+	unsigned int* out_data;
+	checkCudaErrors(cudaGLMapBufferObject((void**)&out_data, pbo));
+
+	//RayTraceImage(out_data, image_width, image_height, total_number_of_triangles, 
+	//	a, b, c, 
+	//	campos, 
+	//	make_float3(light_x,light_y,light_z),
+	//	make_float3(light_color[0],light_color[1],light_color[2]),
+	//	scene_aabbox_min , scene_aabbox_max);
+
+	checkCudaErrors(cudaGLUnmapBufferObject(pbo));
+
+	// download texture from destination PBO
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo);
+	glBindTexture(GL_TEXTURE_2D, result_texture);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, image_width, image_height, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
+	SDK_CHECK_ERROR_GL();
+}
