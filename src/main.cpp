@@ -5,6 +5,7 @@
 namespace {
   int mouseX, mouseY;
   int mouseButtons = 0;   // 0x1 left, 0x2 middle, 0x4 right
+  float timer = 0.0f;
 
   uint image_width = WINDOW_W;
   uint image_height = WINDOW_H;
@@ -25,7 +26,9 @@ void mouse(int button, int state, int x, int y);
 void motion(int x, int y);
 void raytrace();
 
-extern "C" void raytrace(uint *pbo_out, uint w, uint h);
+extern "C" 
+void raytrace(uint *pbo_out, uint w, uint h,
+  float time);
 
 int main(int argc, char **argv) {
   glutInit(&argc, argv);
@@ -101,6 +104,8 @@ void resize(int width, int height) {
 }
 
 void draw() {
+  timer += DELTA_T;
+
   glClear(GL_COLOR_BUFFER_BIT);
 
   raytrace();
@@ -219,7 +224,8 @@ void raytrace()
 	//	make_float3(light_color[0],light_color[1],light_color[2]),
 	//	scene_aabbox_min , scene_aabbox_max);
 
-  raytrace(out_data, image_width, image_height);
+  raytrace(out_data, image_width, image_height, 
+    timer);
 
 	checkCudaErrors(cudaGLUnmapBufferObject(pbo));
 
