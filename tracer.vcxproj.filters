@@ -15,6 +15,9 @@
     <Filter Include="externals">
       <UniqueIdentifier>{c688fbad-0e2b-4180-b3de-c5d8f67b976a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="shaders">
+      <UniqueIdentifier>{72de0770-37c7-47de-a21a-06eb98392ce4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\FullScreenQuad.h">
@@ -23,5 +26,25 @@
     <ClInclude Include="src\common.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="src\Utils.h">
+      <Filter>src</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\shaders\fullscreenQuad.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="src\shaders\standard.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="src\shaders\standard.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="src\shaders\fullscreenQuad.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="src\shaders\globals">
+      <Filter>shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

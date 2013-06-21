@@ -105,6 +105,14 @@
   <ItemGroup>
     <ClInclude Include="src\common.h" />
     <ClInclude Include="src\FullScreenQuad.h" />
+    <ClInclude Include="src\Utils.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\shaders\fullscreenQuad.frag" />
+    <None Include="src\shaders\fullscreenQuad.vert" />
+    <None Include="src\shaders\globals" />
+    <None Include="src\shaders\standard.frag" />
+    <None Include="src\shaders\standard.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

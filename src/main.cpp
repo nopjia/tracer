@@ -1,9 +1,13 @@
+#include "Utils.h"
 #include "common.h"
 #include "FullScreenQuad.h"
 
 namespace {
   int mouseX, mouseY;
   int mouseButtons = 0;   // 0x1 left, 0x2 middle, 0x4 right
+
+  uint image_width = WINDOW_W;
+  uint image_height = WINDOW_H;
 
   GLuint pbo;               // pbo for CUDA and openGL
   GLuint result_texture;    // render result copied to this openGL texture
@@ -19,6 +23,8 @@ void draw();
 void keyboard(unsigned char key, int x, int y);
 void mouse(int button, int state, int x, int y);
 void motion(int x, int y);
+void raytrace();
+
 
 int main(int argc, char **argv) {
   glutInit(&argc, argv);
@@ -142,21 +148,18 @@ void motion(int x, int y) {
 
 void initCUDA (int argc, char **argv)
 {
-  if ( checkCmdLineFlag(argc, (const char **)argv, "device"))
+  if (checkCmdLineFlag(argc, (const char **)argv, "device"))
   {
     gpuGLDeviceInit(argc, (const char **)argv);
   }
   else 
   {
-    cudaGLSetGLDevice (gpuGetMaxGflopsDeviceId());
+    cudaGLSetGLDevice(gpuGetMaxGflopsDeviceId());
   }
 }
 
 void initCUDAMemory()
 {
-  uint image_width = WINDOW_W;
-  uint image_height = WINDOW_H;
-
   // initialize the PBO for transferring data from CUDA to openGL
   uint num_texels = image_width * image_height;
   uint size_tex_data = sizeof(GLubyte) * num_texels * 4;
@@ -175,6 +178,7 @@ void initCUDAMemory()
   //CUT_CHECK_ERROR_GL();
 
   // create the texture that we use to visualize the ray-tracing result
+  glActiveTexture(GL_TEXTURE0 + RENDER_TEXTURE);
   glGenTextures(1, &result_texture);
   glBindTexture(GL_TEXTURE_2D, result_texture);
 
@@ -188,3 +192,26 @@ void initCUDAMemory()
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
   //CUT_CHECK_ERROR_GL();
 }
+
+//void raytrace()
+//{
+//	unsigned int* out_data;
+//	checkCudaErrors(cudaGLMapBufferObject((void**)&out_data, pbo));
+//
+//	//RayTraceImage(out_data, image_width, image_height, total_number_of_triangles, 
+//	//	a, b, c, 
+//	//	campos, 
+//	//	make_float3(light_x,light_y,light_z),
+//	//	make_float3(light_color[0],light_color[1],light_color[2]),
+//	//	scene_aabbox_min , scene_aabbox_max);
+//
+//	checkCudaErrors(cudaGLUnmapBufferObject( pbo));
+//
+//	// download texture from destination PBO
+//	glBindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, pbo);
+//	glBindTexture(GL_TEXTURE_2D, result_texture);
+//	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, image_width, image_height, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
+//	glBindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
+//
+//	//CUT_CHECK_ERROR_GL();
+//}

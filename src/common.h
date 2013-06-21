@@ -31,12 +31,28 @@ typedef unsigned char uchar;
 typedef unsigned int uint;
 
 // constants
-#define WINDOW_W 640
-#define WINDOW_H 480
+const uint WINDOW_W = 640;
+const uint WINDOW_H = 480;
 
 // Vertex attribute indexes
-const uint POSITION_ATTR            = 0;
-const uint NORMAL_ATTR              = 1;
-const uint UV_ATTR                  = 2;
+const uint POSITION_ATTR                    = 0;
+const uint NORMAL_ATTR                      = 1;
+const uint UV_ATTR                          = 2;
+
+// Uniform buffer objects binding points
+const uint PER_FRAME_UBO_BINDING            = 0;
+const uint LIGHT_UBO_BINDING                = 1;
+const uint MESH_MATERIAL_ARRAY_BINDING      = 2;
+const uint POSITION_ARRAY_BINDING           = 3;
+
+// Sampler binding points
+const uint NON_USED_TEXTURE                 = 0;
+const uint RENDER_TEXTURE                   = 1;
+
+// Max values
+const uint MAX_TEXTURE_ARRAYS               = 10;
+const uint NUM_OBJECTS_MAX                  = 500;
+const uint NUM_MESHES_MAX                   = 500;
+const uint MAX_POINT_LIGHTS                 = 8;
 
 #endif  // COMMON_H
