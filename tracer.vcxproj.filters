@@ -7,6 +7,9 @@
     <ClCompile Include="externals\gl3w.c">
       <Filter>externals</Filter>
     </ClCompile>
+    <ClCompile Include="src\Camera.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -27,6 +30,9 @@
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="src\Utils.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Camera.h">
       <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>

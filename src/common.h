@@ -8,6 +8,7 @@ typedef unsigned int uint;
 // constants
 const uint WINDOW_W = 640;
 const uint WINDOW_H = 480;
+const uint FOV = 45;
 const uint BLOCK_SIZE = 32;
 const float DELTA_T = 0.1f;
 

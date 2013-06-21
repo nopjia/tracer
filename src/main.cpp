@@ -1,6 +1,7 @@
 #include "Utils.h"
 #include "common.h"
 #include "FullScreenQuad.h"
+#include "Camera.h"
 
 namespace {
   int mouseX, mouseY;
@@ -12,7 +13,8 @@ namespace {
 
   GLuint pbo;               // pbo for CUDA and openGL
   GLuint result_texture;    // render result copied to this openGL texture
-  FullScreenQuad* fullScreenQuad = new FullScreenQuad();
+  FullScreenQuad fullScreenQuad;
+  ThirdPersonCamera camera;
 }
 
 // global methods
@@ -27,7 +29,9 @@ void motion(int x, int y);
 void raytrace();
 
 extern "C" 
-void raytrace(uint *pbo_out, uint w, uint h,
+void raytrace(
+  uint *pbo_out, uint w, uint h,
+  glm::vec3 campos, glm::vec3 A, glm::vec3 B, glm::vec3 C,
   float time);
 
 int main(int argc, char **argv) {
@@ -67,8 +71,7 @@ int main(int argc, char **argv) {
   
   glutMainLoop();
   cudaThreadExit();
-
-
+  
   return 0;
 }
 
@@ -76,6 +79,8 @@ void initGL() {
   std::cout << "OpenGL " << glGetString(GL_VERSION) 
     << "\nGLSL " << glGetString(GL_SHADING_LANGUAGE_VERSION)
     << std::endl;
+
+  glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
 
   // back face culling
   //glEnable(GL_CULL_FACE);
@@ -92,15 +97,15 @@ void initGL() {
 
   //glEnable(GL_TEXTURE_2D);
   //glDisable(GL_LIGHTING);
-
-  glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
-
   
-  fullScreenQuad->begin();
+  fullScreenQuad.begin();
+  camera.setAspectRatio(WINDOW_W, WINDOW_H);
+  camera.zoom(-5.0f);
 }
 
-void resize(int width, int height) {  
+void resize(int width, int height) {
   glViewport(0, 0, width, height);
+  camera.setAspectRatio(WINDOW_W, WINDOW_H);
 }
 
 void draw() {
@@ -108,8 +113,10 @@ void draw() {
 
   glClear(GL_COLOR_BUFFER_BIT);
 
+  camera.update();
+
   raytrace();
-  fullScreenQuad->display();
+  fullScreenQuad.display();
 
   glutSwapBuffers();
 }
@@ -138,16 +145,15 @@ void motion(int x, int y) {
   float dx, dy;
   dx = (float)(x - mouseX);
   dy = (float)(y - mouseY);
-
-  /*
+   
   if (mouseButtons & 0x1) {
-    rotateX += dy * 0.2f;
-    rotateY += dx * 0.2f;
+    const float FACTOR = 0.1f;
+    camera.rotate(FACTOR*dx, FACTOR*dy);
   }
   else if (mouseButtons & 0x4) {
-    translateZ += dy * 0.01f;
-  }
-  */
+    const float FACTOR = 0.05f;
+    camera.zoom(FACTOR*dy);
+  }  
 
   mouseX = x;
   mouseY = y;
@@ -214,17 +220,30 @@ void initCUDAMemory()
 
 void raytrace()
 {
-	unsigned int* out_data;
+	// calc cam vars
+  glm::vec3 A,B,C;
+  {
+    // camera ray
+    C = glm::normalize(camera.getLookAt()-camera.getPosition());
+
+    // calc A (screen x)
+    // calc B (screen y) then scale down relative to aspect
+    // fov is for screen x axis
+    A = glm::normalize(glm::cross(C,camera.getUp()));
+    B = glm::float32(-1.0/(camera.getAspect()))*glm::normalize(glm::cross(A,C));
+
+    // scale by FOV
+    float tanFOV = tan(glm::radians(camera.getFOV()));
+    A *= tanFOV;
+    B *= tanFOV;
+  }
+
+  // cuda call
+  unsigned int* out_data;
 	checkCudaErrors(cudaGLMapBufferObject((void**)&out_data, pbo));
-
-	//RayTraceImage(out_data, image_width, image_height, total_number_of_triangles, 
-	//	a, b, c, 
-	//	campos, 
-	//	make_float3(light_x,light_y,light_z),
-	//	make_float3(light_color[0],light_color[1],light_color[2]),
-	//	scene_aabbox_min , scene_aabbox_max);
-
-  raytrace(out_data, image_width, image_height, 
+  
+  raytrace(out_data, image_width, image_height,
+    camera.getPosition(),A,B,C,
     timer);
 
 	checkCudaErrors(cudaGLUnmapBufferObject(pbo));

@@ -15,24 +15,34 @@ __device__ int rgbToInt(float r, float g, float b)
 
 __global__ void raytraceKernel(
   uint *pbo_out, uint w, uint h,
+  glm::vec3 campos, glm::vec3 A, glm::vec3 B, glm::vec3 C,
   float time
   ) 
 {  
   uint x = blockIdx.x*blockDim.x + threadIdx.x;
   uint y = blockIdx.y*blockDim.y + threadIdx.y;
 
-  float fade = (glm::sin(time+y*(16.0/WINDOW_H))+1.0)/2.0;
+  glm::vec2 uv((float)x/w, (float)y/h);
+  
+  glm::vec3 ro = campos+C
+    + (2.0f*uv.x-1.0f)*A
+    + (2.0f*uv.y-1.0f)*B;
+  glm::vec3 rd = glm::normalize(ro-campos);
 
-  pbo_out[y*w + x] = rgbToInt(fade*1.0, 0.0, fade*0.5);
+  pbo_out[y*w + x] = rgbToInt(rd.x, rd.y, rd.z);
 }
 
 extern "C" 
 void raytrace(
-  uint *pbo_out, uint w, uint h, 
+  uint *pbo_out, uint w, uint h,
+  glm::vec3 campos, glm::vec3 A, glm::vec3 B, glm::vec3 C,
   float time
   )
 {
   dim3 block(8,8);
 	dim3 grid(w/block.x,h/block.y);
-	raytraceKernel<<<grid, block>>>(pbo_out,w,h,time);
+	raytraceKernel<<<grid, block>>>(
+    pbo_out,w,h,
+    campos,A,B,C,
+    time);
 }
