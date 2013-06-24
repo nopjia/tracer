@@ -14,7 +14,7 @@
 
 
 # VS Files
-*.[Oo]bj
+//*.[Oo]bj
 *.user
 *.aps
 *.pch
