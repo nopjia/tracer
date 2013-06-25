@@ -107,6 +107,9 @@
     <ClInclude Include="src\Camera.h" />
     <ClInclude Include="src\common.h" />
     <ClInclude Include="src\FullScreenQuad.h" />
+    <ClInclude Include="src\Mesh.h" />
+    <ClInclude Include="src\Mesh.inl" />
+    <ClInclude Include="src\Object.inl" />
     <ClInclude Include="src\Utils.h" />
   </ItemGroup>
   <ItemGroup>

@@ -2,6 +2,8 @@
 #include "common.h"
 #include "FullScreenQuad.h"
 #include "Camera.h"
+#include "Object.inl"
+#include "Mesh.h"
 
 namespace {
   int mouseX, mouseY;
@@ -15,18 +17,23 @@ namespace {
   GLuint result_texture;    // render result copied to this openGL texture
   FullScreenQuad fullScreenQuad;
   ThirdPersonCamera camera;
+
+  std::vector<Object::Object> scene;
+  Object::Object* scene_d;  // pointer to device
 }
 
 // global methods
 void initGL();
 void initCUDA (int argc, char **argv);
-void initCUDAMemory();
+void initPBO();
+void loadScene();
+void loadSceneCUDA();
+void raytrace();
 void resize(int width, int height);
 void draw();
 void keyboard(unsigned char key, int x, int y);
 void mouse(int button, int state, int x, int y);
 void motion(int x, int y);
-void raytrace();
 
 extern "C" 
 void raytrace(
@@ -67,8 +74,9 @@ int main(int argc, char **argv) {
 
   initGL();
   initCUDA(argc, argv);
-  initCUDAMemory();
-  
+  initPBO();
+  loadScene();
+
   glutMainLoop();
   cudaThreadExit();
   
@@ -159,8 +167,7 @@ void motion(int x, int y) {
   mouseY = y;
 }
 
-void initCUDA (int argc, char **argv)
-{
+void initCUDA (int argc, char **argv) {
   if (checkCmdLineFlag(argc, (const char **)argv, "device"))
   {
     gpuGLDeviceInit(argc, (const char **)argv);
@@ -171,8 +178,8 @@ void initCUDA (int argc, char **argv)
   }
 }
 
-void initCUDAMemory()
-{
+void initPBO() {
+
   // initialize the PBO for transferring data from CUDA to openGL
   uint num_texels = image_width * image_height;
   uint size_tex_data = sizeof(GLubyte) * num_texels * 4;
@@ -218,8 +225,8 @@ void initCUDAMemory()
   glActiveTexture(GL_TEXTURE0 + UNUSED_TEXTURE);
 }
 
-void raytrace()
-{
+void raytrace() {
+
 	// calc cam vars
   glm::vec3 A,B,C;
   {
@@ -257,4 +264,13 @@ void raytrace()
   glActiveTexture(GL_TEXTURE0 + UNUSED_TEXTURE);
 
 	SDK_CHECK_ERROR_GL();
+}
+
+void loadScene() {  
+  Mesh::Mesh* decaMesh = Mesh::loadObj("data/dodecahedron.obj");
+  Object::Object* decaObj = Object::newObject(decaMesh);
+  // copy obj and delete
+  // keep mesh memory
+  scene.push_back(*decaObj);
+  delete decaObj;
 }

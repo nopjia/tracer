@@ -35,6 +35,15 @@
     <ClInclude Include="src\Camera.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="src\Mesh.inl">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Object.inl">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Mesh.h">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\shaders\fullscreenQuad.vert">
