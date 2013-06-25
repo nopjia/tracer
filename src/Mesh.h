@@ -80,7 +80,7 @@ namespace Mesh {
       mesh->m_bmax.z = glm::max(mesh->m_bmax.z, mesh->m_verts[i].z);
     }
 
-    std::printf("Loaded \"%s\" %u verts %u faces", filename.c_str(), verts.size(), faces.size());
+    std::printf("Loaded \"%s\" %u verts %u faces\n", filename.c_str(), verts.size(), faces.size());
 
     return mesh;
   }

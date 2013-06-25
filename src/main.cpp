@@ -272,6 +272,11 @@ void loadScene() {
   Mesh::Mesh* decaMesh = Mesh::loadObj("data/dodecahedron.obj");
   Object::Object* decaObj = Object::newObject(decaMesh);
   scene.push_back(decaObj);
+
+  Mesh::Mesh* decaMesh2 = Mesh::loadObj("data/dodecahedron.obj");
+  Object::Object* decaObj2 = Object::newObject(decaMesh2);
+  decaObj2->m_material.m_color = glm::vec3(1.0, 1.0, 0.0);
+  scene.push_back(decaObj2);
 }
 
 void loadSceneCUDA() {  

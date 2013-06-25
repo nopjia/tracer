@@ -16,8 +16,10 @@
 namespace Material {
 
   struct Material {
-    glm::vec3 color;
-    float emissivity;
+    Material() : m_color(glm::vec3(0.5)), m_emissivity(0.0){}
+
+    glm::vec3 m_color;
+    float m_emissivity;
   };
 
 }

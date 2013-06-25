@@ -46,11 +46,8 @@ namespace Object {
     obj->m_scale = glm::vec3(1.0f);
     obj->m_translation = glm::vec3(0.0f);
     obj->m_rotationQuat = glm::quat();
-
     obj->m_mesh = mesh;
-
-    obj->m_material.color = glm::vec3(0.5f);
-    obj->m_material.emissivity = 0.0f;
+    obj->m_material = Material::Material();
 
     return obj;
   }

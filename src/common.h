@@ -6,6 +6,8 @@ typedef unsigned char uchar;
 typedef unsigned int uint;
 
 // constants
+#define EPS 0.001f
+
 const uint WINDOW_W = 640;
 const uint WINDOW_H = 480;
 const uint FOV = 45;

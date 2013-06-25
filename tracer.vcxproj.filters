@@ -61,6 +61,12 @@
     <None Include="src\shaders\globals">
       <Filter>shaders</Filter>
     </None>
+    <None Include="src\Material.inl">
+      <Filter>src</Filter>
+    </None>
+    <None Include="src\Ray.inl">
+      <Filter>src</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="src\raytrace.cu">

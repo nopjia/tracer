@@ -2,6 +2,7 @@
 #include <glm/glm.hpp>
 #include "common.h"
 #include "Object.inl"
+#include "Ray.inl"
 
 // convert floating point rgb color to 8-bit integer
 __device__ int rgbToInt(float r, float g, float b)
@@ -12,6 +13,13 @@ __device__ int rgbToInt(float r, float g, float b)
 
   // notice switch red and blue to counter the GL_BGRA
   return (int(r*255.0)<<16) | (int(g*255.0)<<8) | int(b*255.0);
+}
+__device__ int rgbToInt(glm::vec3 c)
+{
+  c = glm::clamp(c, 0.0f, 1.0f);
+
+  // notice switch red and blue to counter the GL_BGRA
+  return (int(c.r*255.0)<<16) | (int(c.g*255.0)<<8) | int(c.b*255.0);
 }
 
 __global__ void raytraceKernel(
@@ -30,7 +38,8 @@ __global__ void raytraceKernel(
     + (2.0f*uv.y-1.0f)*B;
   glm::vec3 rd = glm::normalize(ro-campos);
 
-  pbo_out[y*w + x] = rgbToInt(rd.x, rd.y, rd.z);
+  pbo_out[y*w + x] = rgbToInt(scene[0].m_material.m_color);
+  //pbo_out[y*w + x] = rgbToInt(rd);
 }
 
 extern "C" 

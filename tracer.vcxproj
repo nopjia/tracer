@@ -113,6 +113,8 @@
     <ClInclude Include="src\Utils.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="src\Material.inl" />
+    <None Include="src\Ray.inl" />
     <None Include="src\shaders\fullscreenQuad.frag" />
     <None Include="src\shaders\fullscreenQuad.vert" />
     <None Include="src\shaders\globals" />
