@@ -18,7 +18,7 @@ namespace {
   FullScreenQuad fullScreenQuad;
   ThirdPersonCamera camera;
 
-  std::vector<Object::Object> scene;
+  std::vector<Object::Object*> scene;
   Object::Object* scene_d;  // pointer to device
 }
 
@@ -39,7 +39,7 @@ extern "C"
 void raytrace(
   uint *pbo_out, uint w, uint h,
   glm::vec3 campos, glm::vec3 A, glm::vec3 B, glm::vec3 C,
-  float time);
+  Object::Object* scene_data, float time);
 
 int main(int argc, char **argv) {
   glutInit(&argc, argv);
@@ -76,6 +76,7 @@ int main(int argc, char **argv) {
   initCUDA(argc, argv);
   initPBO();
   loadScene();
+  loadSceneCUDA();
 
   glutMainLoop();
   cudaThreadExit();
@@ -251,6 +252,7 @@ void raytrace() {
   
   raytrace(out_data, image_width, image_height,
     camera.getPosition(),A,B,C,
+    scene_d,
     timer);
 
 	checkCudaErrors(cudaGLUnmapBufferObject(pbo));
@@ -269,8 +271,40 @@ void raytrace() {
 void loadScene() {  
   Mesh::Mesh* decaMesh = Mesh::loadObj("data/dodecahedron.obj");
   Object::Object* decaObj = Object::newObject(decaMesh);
-  // copy obj and delete
-  // keep mesh memory
-  scene.push_back(*decaObj);
-  delete decaObj;
+  scene.push_back(decaObj);
+}
+
+void loadSceneCUDA() {  
+  size_t meshMemSize = sizeof(Mesh::Mesh);
+  size_t objectMemSize = sizeof(Object::Object);
+
+  size_t sceneMemSize = scene.size()*objectMemSize;
+  Object::Object* scene_hd = (Object::Object*)malloc(sceneMemSize);
+
+  for (int i=0; i<scene.size(); ++i) {
+    Object::Object& obj = *(scene[i]);
+
+    memcpy(&scene_hd[i], &obj, objectMemSize);
+
+    Mesh::Mesh* mesh_hd = (Mesh::Mesh*)malloc(meshMemSize);
+    memcpy(mesh_hd, obj.m_mesh, meshMemSize);
+
+    size_t vertsMemSize = obj.m_mesh->m_numVerts*sizeof(glm::vec3);
+    cudaMalloc(&mesh_hd->m_verts, vertsMemSize);
+    cudaMemcpy(mesh_hd->m_verts, obj.m_mesh->m_verts, vertsMemSize, cudaMemcpyHostToDevice);
+
+    size_t facesMemSize = obj.m_mesh->m_numFaces*sizeof(Mesh::Triangle);
+    cudaMalloc(&mesh_hd->m_faces, facesMemSize);
+    cudaMemcpy(mesh_hd->m_faces, obj.m_mesh->m_faces, facesMemSize, cudaMemcpyHostToDevice);
+
+    cudaMalloc(&scene_hd[i].m_mesh, meshMemSize);
+    cudaMemcpy(scene_hd[i].m_mesh, mesh_hd, meshMemSize, cudaMemcpyHostToDevice);
+
+    free(mesh_hd);
+  }
+
+  cudaMalloc(&scene_d, sceneMemSize);
+  cudaMemcpy(scene_d, scene_hd, sceneMemSize, cudaMemcpyHostToDevice);
+
+  free(scene_hd);
 }

@@ -1,6 +1,7 @@
 #include <cuda_runtime.h>
 #include <glm/glm.hpp>
 #include "common.h"
+#include "Object.inl"
 
 // convert floating point rgb color to 8-bit integer
 __device__ int rgbToInt(float r, float g, float b)
@@ -16,7 +17,7 @@ __device__ int rgbToInt(float r, float g, float b)
 __global__ void raytraceKernel(
   uint *pbo_out, uint w, uint h,
   glm::vec3 campos, glm::vec3 A, glm::vec3 B, glm::vec3 C,
-  float time
+  Object::Object* scene, float time
   ) 
 {  
   uint x = blockIdx.x*blockDim.x + threadIdx.x;
@@ -36,7 +37,7 @@ extern "C"
 void raytrace(
   uint *pbo_out, uint w, uint h,
   glm::vec3 campos, glm::vec3 A, glm::vec3 B, glm::vec3 C,
-  float time
+  Object::Object* scene, float time
   )
 {
   dim3 block(8,8);
@@ -44,5 +45,6 @@ void raytrace(
 	raytraceKernel<<<grid, block>>>(
     pbo_out,w,h,
     campos,A,B,C,
+    scene,
     time);
 }
