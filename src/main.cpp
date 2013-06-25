@@ -4,6 +4,7 @@
 #include "Camera.h"
 #include "Object.inl"
 #include "Mesh.h"
+#include "Ray.inl"
 
 namespace {
   int mouseX, mouseY;
@@ -37,9 +38,11 @@ void motion(int x, int y);
 
 extern "C" 
 void raytrace(
-  uint *pbo_out, uint w, uint h,
-  glm::vec3 campos, glm::vec3 A, glm::vec3 B, glm::vec3 C,
-  Object::Object* scene_data, float time);
+  uint *pbo_out, 
+  const uint w, const uint h,
+  const glm::vec3& campos, const glm::vec3& A, const glm::vec3& B, const glm::vec3& C,
+  const Object::Object* scene, const uint sceneSize,
+  const float time);
 
 int main(int argc, char **argv) {
   glutInit(&argc, argv);
@@ -71,6 +74,8 @@ int main(int argc, char **argv) {
     std::cerr << "OpenGL 4.2 not supported" << std::endl;
     return -1;
   }
+
+  Ray::Hit hit;
 
   initGL();
   initCUDA(argc, argv);
@@ -252,7 +257,7 @@ void raytrace() {
   
   raytrace(out_data, image_width, image_height,
     camera.getPosition(),A,B,C,
-    scene_d,
+    scene_d, scene.size(),
     timer);
 
 	checkCudaErrors(cudaGLUnmapBufferObject(pbo));

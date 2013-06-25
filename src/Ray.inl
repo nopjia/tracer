@@ -23,9 +23,9 @@ namespace Ray {
   };
 
   struct Hit {
-    Hit() : m_id(-1){}
+    HOST DEVICE Hit() : m_id(-1){}
 
-    uint m_id;  // object ID
+    int m_id;  // object ID
     glm::vec3 m_pos;
     glm::vec3 m_nor;
   };
@@ -33,6 +33,7 @@ namespace Ray {
   // forward declarations
   HOST DEVICE extern inline Ray transform(const Ray& ray, const glm::mat4& m);
   HOST DEVICE extern inline Hit transform(const Hit& hit, const glm::mat4& m);
+  HOST DEVICE extern inline Hit intersectScene(const Ray& ray, const Object::Object* scene, const uint size);
   HOST DEVICE extern inline Hit intersect(const Ray& ray, const Object::Object& obj);
   HOST DEVICE extern inline Hit intersect(const Ray& ray, const Mesh::Mesh& mesh);
   HOST DEVICE extern inline Hit intersect(const Ray& ray, const Mesh::Triangle& tri);
@@ -57,6 +58,25 @@ namespace Ray {
     return h;
   }
 
+  Hit intersectScene(const Ray& ray, const Object::Object* scene, const uint size) {
+    float mindist = FLT_MAX;
+    Hit minhit;
+
+    for (int i=0; i<size; ++i) {
+      Hit h ( intersect(ray, scene[i]) );
+      if (h.m_id > 0) {
+        float dist = glm::distance(ray.m_pos, h.m_pos);
+        if (dist<mindist) {
+          mindist = dist;
+          minhit = h;
+          minhit.m_id = i;
+        }
+      }
+    }
+
+    return minhit;
+  }
+
   Hit intersect(const Ray& ray, const Object::Object& obj) {
     // transform ray, world to object space
     Ray r ( transform(ray, glm::inverse(Object::getModelMatrix(obj))) );
@@ -74,7 +94,7 @@ namespace Ray {
   }
 
   Hit intersect(const Ray& ray, const Mesh::Mesh& mesh) {
-    float tmin = -FLT_MIN;
+    float tmin = FLT_MIN;
     float tmax = FLT_MAX;
     for (int i=0; i<3; ++i) {
       if (glm::abs(ray.m_dir[i]) < EPS) {
@@ -85,16 +105,15 @@ namespace Ray {
       }
       else {
         // compute intersect t with near and far plane
-        float ood = 1.0f / ray.m_dir[i];
-        float t1 = (mesh.m_bmin[i] - ray.m_pos[i]) * ood;
-        float t2 = (mesh.m_bmax[i] - ray.m_pos[i]) * ood;
+        float t1 = (mesh.m_bmin[i] - ray.m_pos[i]) / ray.m_dir[i];
+        float t2 = (mesh.m_bmax[i] - ray.m_pos[i]) / ray.m_dir[i];
         // make t1 intersection with near plane, swap
         if (t1 > t2) { float temp = t1; t1 = t2; t2 = temp; }
         // compute intersect slab intervals
         if (t1 > tmin) tmin = t1;
-        if (t2 > tmax) tmax = t2;
+        if (t2 < tmax) tmax = t2;
         // exit with no collision, empty slab intersection
-        if (tmin > tmax) return Hit();
+        if (tmin > tmax || tmax < 0.0f) return Hit();
       }
     }
     // ray intersects all 3 slabs, return

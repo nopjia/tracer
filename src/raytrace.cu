@@ -23,37 +23,51 @@ __device__ int rgbToInt(glm::vec3 c)
 }
 
 __global__ void raytraceKernel(
-  uint *pbo_out, uint w, uint h,
-  glm::vec3 campos, glm::vec3 A, glm::vec3 B, glm::vec3 C,
-  Object::Object* scene, float time
-  ) 
+  uint *pbo_out, 
+  const uint w, const uint h,
+  const glm::vec3 campos, const glm::vec3 A, const glm::vec3 B, const glm::vec3 C,
+  const Object::Object* scene, const uint sceneSize,
+  const float time)
 {  
   uint x = blockIdx.x*blockDim.x + threadIdx.x;
   uint y = blockIdx.y*blockDim.y + threadIdx.y;
 
   glm::vec2 uv((float)x/w, (float)y/h);
   
-  glm::vec3 ro = campos+C
+  Ray::Ray ray;
+  ray.m_pos = campos+C
     + (2.0f*uv.x-1.0f)*A
     + (2.0f*uv.y-1.0f)*B;
-  glm::vec3 rd = glm::normalize(ro-campos);
+  ray.m_dir = glm::normalize(ray.m_pos-campos);
 
-  pbo_out[y*w + x] = rgbToInt(scene[0].m_material.m_color);
+  Ray::Hit hit = Ray::intersectScene(ray, scene, sceneSize);
+
+  glm::vec3 outcolor;
+  
+  if (hit.m_id < 0) {
+    outcolor = glm::vec3(0.0f);
+  }
+  else {
+    outcolor = scene[hit.m_id].m_material.m_color;
+  }  
+
+  pbo_out[y*w + x] = rgbToInt(outcolor);
   //pbo_out[y*w + x] = rgbToInt(rd);
 }
 
 extern "C" 
 void raytrace(
-  uint *pbo_out, uint w, uint h,
-  glm::vec3 campos, glm::vec3 A, glm::vec3 B, glm::vec3 C,
-  Object::Object* scene, float time
-  )
+  uint *pbo_out, 
+  const uint w, const uint h,
+  const glm::vec3& campos, const glm::vec3& A, const glm::vec3& B, const glm::vec3& C,
+  const Object::Object* scene, const uint sceneSize,
+  const float time)
 {
   dim3 block(8,8);
 	dim3 grid(w/block.x,h/block.y);
 	raytraceKernel<<<grid, block>>>(
     pbo_out,w,h,
     campos,A,B,C,
-    scene,
+    scene,sceneSize,
     time);
 }
