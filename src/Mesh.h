@@ -67,6 +67,19 @@ namespace Mesh {
     memcpy(mesh->m_faces, faces.data(), facesMemSize);
     mesh->m_numFaces = faces.size();
 
+    // calc bounding box
+    mesh->m_bmin = glm::vec3(FLT_MAX);
+    mesh->m_bmax = glm::vec3(FLT_MIN);
+    for (int i=0; i<mesh->m_numVerts; ++i) {      
+      mesh->m_bmin.x = glm::min(mesh->m_bmin.x, mesh->m_verts[i].x);
+      mesh->m_bmin.y = glm::min(mesh->m_bmin.y, mesh->m_verts[i].y);
+      mesh->m_bmin.z = glm::min(mesh->m_bmin.z, mesh->m_verts[i].z);
+
+      mesh->m_bmax.x = glm::max(mesh->m_bmax.x, mesh->m_verts[i].x);
+      mesh->m_bmax.y = glm::max(mesh->m_bmax.y, mesh->m_verts[i].y);
+      mesh->m_bmax.z = glm::max(mesh->m_bmax.z, mesh->m_verts[i].z);
+    }
+
     std::printf("Loaded \"%s\" %u verts %u faces", filename.c_str(), verts.size(), faces.size());
 
     return mesh;
