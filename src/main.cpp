@@ -11,8 +11,8 @@ namespace {
   int mouseButtons = 0;   // 0x1 left, 0x2 middle, 0x4 right
   float timer = 0.0f;
 
-  uint image_width = WINDOW_W;
-  uint image_height = WINDOW_H;
+  uint image_width = WINDOW_W / PIXSCALE;
+  uint image_height = WINDOW_H / PIXSCALE;
 
   GLuint pbo;               // pbo for CUDA and openGL
   GLuint result_texture;    // render result copied to this openGL texture
