@@ -79,9 +79,7 @@ namespace Ray {
 
   Hit intersect(const Ray& ray, const Object::Object& obj) {
     // transform ray, world to object space
-    glm::mat4 mat;
-    mat[3] = glm::vec4(obj.m_translation, 1.0f);
-    Ray r ( transform(ray, glm::inverse(mat)));
+    Ray r ( transform(ray, obj.m_matrixi) );
 
     // intersection test
     Hit hit ( intersect(r, *obj.m_mesh) );
@@ -91,7 +89,7 @@ namespace Ray {
     }
     else {
       // transfrom hit, object to world space
-      return transform(hit, mat);
+      return transform(hit, obj.m_matrix);
     }
 
     return hit;

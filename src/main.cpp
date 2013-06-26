@@ -289,6 +289,8 @@ void raytrace() {
 void loadScene() {  
   Mesh::Mesh* decaMesh = Mesh::loadObj("data/dodecahedron.obj");
   Object::Object* decaObj = Object::newObject(decaMesh);
+  Object::rotate(*decaObj, glm::angleAxis(55.0f, glm::vec3(0.707106781186547524400844362104849039, 0.707106781186547524400844362104849039, 0.0f)));
+  Object::scale(*decaObj, glm::vec3(0.5f, 1.5f, 1.0f));
   Object::translate(*decaObj, glm::vec3(0.0f, 0.0f, 2.0f));
   scene.push_back(decaObj);
 
