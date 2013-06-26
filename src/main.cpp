@@ -330,6 +330,10 @@ void loadSceneCUDA() {
     size_t vertsMemSize = obj.m_mesh->m_numVerts*sizeof(glm::vec3);
     cudaMalloc(&mesh_hd->m_verts, vertsMemSize);
     cudaMemcpy(mesh_hd->m_verts, obj.m_mesh->m_verts, vertsMemSize, cudaMemcpyHostToDevice);
+    
+    size_t normsMemSize = obj.m_mesh->m_numNorms*sizeof(glm::vec3);
+    cudaMalloc(&mesh_hd->m_norms, normsMemSize);
+    cudaMemcpy(mesh_hd->m_norms, obj.m_mesh->m_norms, normsMemSize, cudaMemcpyHostToDevice);
 
     size_t facesMemSize = obj.m_mesh->m_numFaces*sizeof(Mesh::Face);
     cudaMalloc(&mesh_hd->m_faces, facesMemSize);

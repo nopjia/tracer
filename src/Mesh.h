@@ -15,7 +15,7 @@ namespace Mesh {
     char buffer[256], str[255];
     float f1,f2,f3;
 
-    std::vector<glm::vec3> verts;
+    std::vector<glm::vec3> verts, norms;
     std::vector<Face> faces;
 
     while(!in.getline(buffer,255).eof())
@@ -25,26 +25,36 @@ namespace Mesh {
       sscanf_s(buffer,"%s",str,255);
 
       // reading a vertex
-      if (buffer[0]=='v' && (buffer[1]==' '  || buffer[1]==32) )
-      {
-        if ( sscanf(buffer,"v %f %f %f",&f1,&f2,&f3)==3 )
-        {
+      if (buffer[0]=='v' && (buffer[1]==' '  || buffer[1]==32) ) {
+        if ( sscanf(buffer,"v %f %f %f",&f1,&f2,&f3)==3 ) {
           verts.push_back(glm::vec3(f1,f2,f3));
         }
-        else
-        {
+        else {
           std::cout << "ERROR: vertex format" << "\n";
           exit(-1);
         }
       }
 
+      // reading a normal
+      if (buffer[0]=='v' && buffer[1]=='n' && (buffer[2]==' '  || buffer[2]==32) ) {
+        if ( sscanf(buffer,"vn %f %f %f",&f1,&f2,&f3)==3 ) {
+          norms.push_back(glm::vec3(f1,f2,f3));
+        }
+        else {
+          std::cout << "ERROR: normal format" << "\n";
+          exit(-1);
+        }
+      }
+
       // reading FaceMtls 
-      else if (buffer[0]=='f' && (buffer[1]==' ' || buffer[1]==32) )
-      {
+      else if (buffer[0]=='f' && (buffer[1]==' ' || buffer[1]==32) ) {
         Face f;
-        int nt = sscanf(buffer,"f %u %u %u",&f.m_v.x,&f.m_v.y,&f.m_v.z);
-        if( nt!=3 )
-        {
+        int nt = sscanf(buffer,
+          "f %u//%u %u//%u %u//%u",
+          &f.m_v.x, &f.m_n.x,
+          &f.m_v.y, &f.m_n.y,
+          &f.m_v.z, &f.m_n.z);
+        if( nt!=6 ) {
           std::cout << "ERROR: FaceMtl format" << "\n";
           exit(-1);
         }
@@ -62,6 +72,11 @@ namespace Mesh {
     mesh->m_verts = (glm::vec3*)malloc(vertsMemSize);
     memcpy(mesh->m_verts, verts.data(), vertsMemSize);
     mesh->m_numVerts = verts.size();
+
+    size_t normsMemSize = norms.size()*sizeof(glm::vec3);
+    mesh->m_norms = (glm::vec3*)malloc(normsMemSize);
+    memcpy(mesh->m_norms, norms.data(), normsMemSize);
+    mesh->m_numNorms = norms.size();
 
     size_t facesMemSize = faces.size()*sizeof(Face);
     mesh->m_faces = (Face*)malloc(facesMemSize);
@@ -86,7 +101,8 @@ namespace Mesh {
     //for (int i=0; i<mesh->m_numFaces; ++i)
     //  std::printf("%i f %u %u %u\n", i, mesh->m_faces[i].m_v[0]+1, mesh->m_faces[i].m_v[1]+1, mesh->m_faces[i].m_v[2]+1);
 
-    std::printf("Loaded \"%s\" %u verts %u faces\n", filename.c_str(), verts.size(), faces.size());
+    std::printf("Loaded \"%s\" %u verts %u norms %u faces\n", 
+      filename.c_str(), verts.size(), norms.size(), faces.size());
 
     return mesh;
   }

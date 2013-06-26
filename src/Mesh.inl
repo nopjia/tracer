@@ -21,6 +21,7 @@ namespace Mesh {
 
   struct Face {
     glm::uvec3 m_v;
+    glm::uvec3 m_n;
   };
 
   struct Triangle {
@@ -28,8 +29,9 @@ namespace Mesh {
   };
 
   struct Mesh {
-    uint m_numVerts, m_numFaces;
+    uint m_numVerts, m_numNorms, m_numFaces;
     glm::vec3* m_verts;
+    glm::vec3* m_norms;
     Face* m_faces;
     glm::vec3 m_bmin, m_bmax;
   };
