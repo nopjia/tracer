@@ -59,7 +59,7 @@ namespace Ray {
   Hit transform(const Hit& hit, const glm::mat4& m) {
     Hit h(hit);
     h.m_pos = glm::vec3( m*glm::vec4(hit.m_pos, 1.0f) );
-    h.m_nor = glm::vec3( m*glm::vec4(hit.m_nor, 0.0f) );
+    h.m_nor = glm::normalize(glm::vec3( m*glm::vec4(hit.m_nor, 0.0f) ));
     return h;
   }
 

@@ -16,6 +16,7 @@ get FPS
 
 load obj normals
 per vertex normals
+barycentric interp
 
 wave-front kernels
 

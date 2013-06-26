@@ -15,8 +15,8 @@ typedef unsigned int uint;
 #define BLOCK_SIZE  32
 
 // lighting constants
-#define KD 0.7
-#define KA 0.3
+#define KD 1.0
+#define KA 0.0
 
 
 
