@@ -14,3 +14,7 @@ get FPS
 
 load obj normals
 per vertex normals
+
+wave-front kernels
+
+kd-tree: obj tree, scene tree

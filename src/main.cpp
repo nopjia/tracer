@@ -185,6 +185,10 @@ void motion(int x, int y) {
     const float FACTOR = -0.05f;
     camera.rotate(FACTOR*dx, FACTOR*dy);
   }
+  else if (mouseButtons & 0x2) {
+    const float FACTOR = 0.05f;
+    camera.pan(-FACTOR*dx, FACTOR*dy);
+  }
   else if (mouseButtons & 0x4) {
     const float FACTOR = 0.05f;
     camera.zoom(FACTOR*dy);
