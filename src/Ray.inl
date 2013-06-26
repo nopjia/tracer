@@ -129,7 +129,6 @@ namespace Ray {
     hit.m_id = 1; // YES HIT at Mesh level    
     
     // loop triangles and return intersection
-//    hit.m_t = tmin;
     hit.m_t = FLT_MAX;
     for (int i=0; i<mesh.m_numFaces; ++i) {      
       float thit = intersect(ray, 

@@ -3,10 +3,14 @@ CUT_CHECK_ERROR = SDK_CHECK_ERROR_GL
 cutilExit
 bind / map texture
 load triangles
+fix xyz directions
 
 -----
 
-use tmin for intersection comparison
 optimize intersections
+use tmin for intersection comparison
+
 get FPS
-fix xyz directions
+
+load obj normals
+per vertex normals
