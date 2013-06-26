@@ -1,5 +1,11 @@
 GL_PIXEL_UNPACK_BUFFER_ARB
-CUT_CHECK_ERROR
+CUT_CHECK_ERROR = SDK_CHECK_ERROR_GL
 cutilExit
 bind / map texture
 load triangles
+
+-----
+
+use tmin for intersection comparison
+optimize intersections
+get FPS

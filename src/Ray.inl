@@ -65,7 +65,8 @@ namespace Ray {
     for (int i=0; i<size; ++i) {
       Hit h ( intersect(ray, scene[i]) );
       if (h.m_id > 0) {
-        float dist = glm::distance(ray.m_pos, h.m_pos);
+        glm::vec3 subtract = ray.m_pos - h.m_pos;
+        float dist = glm::dot(subtract,subtract);
         if (dist<mindist) {
           mindist = dist;
           minhit = h;

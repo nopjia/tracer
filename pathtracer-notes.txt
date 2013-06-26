@@ -1,0 +1,33 @@
+Scene
+  list of Objects
+
+Object
+  Mesh
+  Material
+
+Material
+  BRDF
+  Color
+  Emissivity
+  
+Mesh
+  transform matrix
+  buffers
+    vertex array
+    normal array
+    index array
+
+Camera
+  center
+  position
+  up
+
+Ray
+
+Intersection - result of intersection test
+  position
+  normal
+  id - for object or material
+
+Film - image buffer
+  HDR buffer
