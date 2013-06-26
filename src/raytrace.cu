@@ -40,7 +40,7 @@ __global__ void raytraceKernel(
     + (2.0f*uv.y-1.0f)*B;
   ray.m_dir = glm::normalize(ray.m_pos-campos);
 
-  Ray::Hit hit = Ray::intersect(ray, *scene[0].m_mesh);
+  Ray::Hit hit = Ray::intersectScene(ray, scene, sceneSize);
 
   glm::vec3 outcolor;
   

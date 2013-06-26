@@ -78,19 +78,21 @@ namespace Ray {
   }
 
   Hit intersect(const Ray& ray, const Object::Object& obj) {
-    // transform ray, world to object space
-    Ray r ( transform(ray, glm::inverse(Object::getModelMatrix(obj))) );
+    //// transform ray, world to object space
+    //Ray r ( transform(ray, glm::inverse(Object::getModelMatrix(obj))) );
 
-    // intersection test
-    Hit hit ( intersect(r, *obj.m_mesh) );
+    //// intersection test
+    //Hit hit ( intersect(r, *obj.m_mesh) );
 
-    if (hit.m_id < 0) {
-      return Hit();
-    }
-    else {
-      // transfrom hit, object to world space
-      return transform(hit, Object::getModelMatrix(obj));
-    }
+    //if (hit.m_id < 0) {
+    //  return Hit();
+    //}
+    //else {
+    //  // transfrom hit, object to world space
+    //  return transform(hit, Object::getModelMatrix(obj));
+    //}
+
+    return intersect(ray, *obj.m_mesh);
   }
 
   Hit intersect(const Ray& ray, const Mesh::Mesh& mesh) {
@@ -125,7 +127,9 @@ namespace Ray {
     // TODO: loop triangles and return intersection
   }
 
-
+  Hit intersect(const Ray& ray, const Mesh::Triangle& tri) {
+    return Hit();
+  }
 }
 
 #endif  // RAY_INL
