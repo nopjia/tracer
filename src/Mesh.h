@@ -70,7 +70,7 @@ namespace Mesh {
     // calc bounding box
     mesh->m_bmin = glm::vec3(FLT_MAX);
     mesh->m_bmax = glm::vec3(FLT_MIN);
-    for (int i=0; i<mesh->m_numVerts; ++i) {      
+    for (int i=0; i<mesh->m_numVerts; ++i) {
       mesh->m_bmin.x = glm::min(mesh->m_bmin.x, mesh->m_verts[i].x);
       mesh->m_bmin.y = glm::min(mesh->m_bmin.y, mesh->m_verts[i].y);
       mesh->m_bmin.z = glm::min(mesh->m_bmin.z, mesh->m_verts[i].z);

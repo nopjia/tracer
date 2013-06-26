@@ -36,16 +36,13 @@ void Camera::rotateDegrees(float x, float y)
   rotate(glm::radians(x), glm::radians(y));
 }
 
-glm::vec3 Camera::getPosition()
-{
+glm::vec3 Camera::getPosition() {
   return m_position;
 }
-glm::vec3 Camera::getLookAt()
-{
+glm::vec3 Camera::getLookAt() {
   return m_lookAt;
 }
-glm::vec3 Camera::getUp()
-{
+glm::vec3 Camera::getUp() {
   return m_upDir;
 }
 float Camera::getAspect() {

@@ -40,16 +40,16 @@ __global__ void raytraceKernel(
     + (2.0f*uv.y-1.0f)*B;
   ray.m_dir = glm::normalize(ray.m_pos-campos);
 
-  Ray::Hit hit = Ray::intersectScene(ray, scene, sceneSize);
+  Ray::Hit hit = Ray::intersect(ray, *scene[0].m_mesh);
 
   glm::vec3 outcolor;
   
   if (hit.m_id < 0) {
-    outcolor = glm::vec3(0.0f);
+    outcolor = ray.m_dir;
   }
   else {
     outcolor = scene[hit.m_id].m_material.m_color;
-  }  
+  }
 
   pbo_out[y*w + x] = rgbToInt(outcolor);
   //pbo_out[y*w + x] = rgbToInt(rd);

@@ -44,6 +44,18 @@ void raytrace(
   const Object::Object* scene, const uint sceneSize,
   const float time);
 
+//void mytest() {
+//  Ray::Ray ray;
+//  Ray::Hit hit;
+//
+//  ray.m_pos = glm::vec3(0.0f, 0.5f, -5.0f);
+//  ray.m_dir = glm::vec3(0.0f, 0.0f, 1.0f);
+//  //hit = Ray::intersect(ray, *scene.data()[1]->m_mesh);  
+//  //hit = Ray::intersect(ray, *scene[1]);
+//  hit = Ray::intersectScene(ray, (const Object::Object**)scene.data(), scene.size());
+//  hit;
+//}
+
 int main(int argc, char **argv) {
   glutInit(&argc, argv);
   // request version 4.2
@@ -74,14 +86,14 @@ int main(int argc, char **argv) {
     std::cerr << "OpenGL 4.2 not supported" << std::endl;
     return -1;
   }
-
-  Ray::Hit hit;
-
+  
   initGL();
   initCUDA(argc, argv);
   initPBO();
   loadScene();
   loadSceneCUDA();
+
+  //mytest();
 
   glutMainLoop();
   cudaThreadExit();
@@ -115,6 +127,7 @@ void initGL() {
   fullScreenQuad.begin();
   camera.setAspectRatio(WINDOW_W, WINDOW_H);
   camera.zoom(-5.0f);
+  camera.update();
 }
 
 void resize(int width, int height) {
@@ -276,6 +289,7 @@ void raytrace() {
 void loadScene() {  
   Mesh::Mesh* decaMesh = Mesh::loadObj("data/dodecahedron.obj");
   Object::Object* decaObj = Object::newObject(decaMesh);
+  Object::translate(*decaObj, glm::vec3(0.0f, 0.0f, 2.0f));
   scene.push_back(decaObj);
 
   Mesh::Mesh* decaMesh2 = Mesh::loadObj("data/dodecahedron.obj");
