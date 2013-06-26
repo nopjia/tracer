@@ -26,6 +26,7 @@ namespace Mesh {
 
   struct Triangle {
     glm::vec3 m_v[3];
+    glm::vec3 m_n[3];
   };
 
   struct Mesh {
@@ -52,6 +53,10 @@ namespace Mesh {
     tri.m_v[0] = mesh.m_verts[mesh.m_faces[idx].m_v[0]];
     tri.m_v[1] = mesh.m_verts[mesh.m_faces[idx].m_v[1]];
     tri.m_v[2] = mesh.m_verts[mesh.m_faces[idx].m_v[2]];
+
+    tri.m_n[0] = mesh.m_norms[mesh.m_faces[idx].m_n[0]];
+    tri.m_n[1] = mesh.m_norms[mesh.m_faces[idx].m_n[1]];
+    tri.m_n[2] = mesh.m_norms[mesh.m_faces[idx].m_n[2]];
 
     return tri;
   }

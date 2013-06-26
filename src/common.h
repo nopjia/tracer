@@ -18,6 +18,9 @@ typedef unsigned int uint;
 #define KD 1.0
 #define KA 0.0
 
+// options
+#define TRI_NORM_INTERP
+
 
 
 // vertex attribute indexes

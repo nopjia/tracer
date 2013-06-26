@@ -304,10 +304,16 @@ void loadScene() {
   obj = Object::newObject(Mesh::loadObj("data/unitcube.obj"));
   Object::rotate(*obj, glm::angleAxis(55.0f, glm::vec3(0.707106781186547524400844362104849039, 0.707106781186547524400844362104849039, 0.0f)));
   Object::scale(*obj, glm::vec3(0.5f, 2.0f, 1.0f));
-  Object::translate(*obj, glm::vec3(3.0f, 0.0f, 1.0f));
+  Object::translate(*obj, glm::vec3(4.0f, -2.0f, 1.0f));
+  obj->m_material.m_color = glm::vec3(0.5, 0.0, 0.8);
   scene.push_back(obj);
 
-  obj = Object::newObject(Mesh::loadObj("data/icosahedron.obj"));
+  obj = Object::newObject(Mesh::loadObj("data/unitcube_inv.obj"));
+  Object::scale(*obj, 10.0f);
+  scene.push_back(obj);
+
+  obj = Object::newObject(Mesh::loadObj("data/icosahedron.obj"));  
+  Object::translate(*obj, glm::vec3(0.0f, -5.0f, 0.0f));
   obj->m_material.m_color = glm::vec3(1.0, 1.0, 0.0);
   scene.push_back(obj);
 }
