@@ -101,7 +101,7 @@ int main(int argc, char **argv) {
   loadScene();
   loadSceneCUDA();
 
-  mytest();
+  //mytest();
 
   glutMainLoop();
   cudaThreadExit();
@@ -182,8 +182,8 @@ void motion(int x, int y) {
   dy = (float)(y - mouseY);
    
   if (mouseButtons & 0x1) {
-    const float FACTOR = 0.05f;
-    camera.rotate(-FACTOR*dx, FACTOR*dy);
+    const float FACTOR = -0.05f;
+    camera.rotate(FACTOR*dx, FACTOR*dy);
   }
   else if (mouseButtons & 0x4) {
     const float FACTOR = 0.05f;
@@ -294,18 +294,18 @@ void raytrace() {
 	SDK_CHECK_ERROR_GL();
 }
 
-void loadScene() {  
-  Mesh::Mesh* decaMesh = Mesh::loadObj("data/dodecahedron.obj");
-  Object::Object* decaObj = Object::newObject(decaMesh);
-  Object::rotate(*decaObj, glm::angleAxis(55.0f, glm::vec3(0.707106781186547524400844362104849039, 0.707106781186547524400844362104849039, 0.0f)));
-  Object::scale(*decaObj, glm::vec3(0.5f, 1.5f, 1.0f));
-  Object::translate(*decaObj, glm::vec3(0.0f, 0.0f, 2.0f));
-  scene.push_back(decaObj);
+void loadScene() {
+  Object::Object* obj;
 
-  Mesh::Mesh* decaMesh2 = Mesh::loadObj("data/dodecahedron.obj");
-  Object::Object* decaObj2 = Object::newObject(decaMesh2);
-  decaObj2->m_material.m_color = glm::vec3(1.0, 1.0, 0.0);
-  scene.push_back(decaObj2);
+  obj = Object::newObject(Mesh::loadObj("data/unitcube.obj"));
+  Object::rotate(*obj, glm::angleAxis(55.0f, glm::vec3(0.707106781186547524400844362104849039, 0.707106781186547524400844362104849039, 0.0f)));
+  Object::scale(*obj, glm::vec3(0.5f, 2.0f, 1.0f));
+  Object::translate(*obj, glm::vec3(3.0f, 0.0f, 1.0f));
+  scene.push_back(obj);
+
+  obj = Object::newObject(Mesh::loadObj("data/icosahedron.obj"));
+  obj->m_material.m_color = glm::vec3(1.0, 1.0, 0.0);
+  scene.push_back(obj);
 }
 
 void loadSceneCUDA() {  

@@ -9,3 +9,4 @@ load triangles
 use tmin for intersection comparison
 optimize intersections
 get FPS
+fix xyz directions
