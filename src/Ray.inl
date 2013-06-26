@@ -78,21 +78,23 @@ namespace Ray {
   }
 
   Hit intersect(const Ray& ray, const Object::Object& obj) {
-    //// transform ray, world to object space
-    //Ray r ( transform(ray, glm::inverse(Object::getModelMatrix(obj))) );
+    // transform ray, world to object space
+    glm::mat4 mat;
+    mat[3] = glm::vec4(obj.m_translation, 1.0f);
+    Ray r ( transform(ray, glm::inverse(mat)));
 
-    //// intersection test
-    //Hit hit ( intersect(r, *obj.m_mesh) );
+    // intersection test
+    Hit hit ( intersect(r, *obj.m_mesh) );
 
-    //if (hit.m_id < 0) {
-    //  return Hit();
-    //}
-    //else {
-    //  // transfrom hit, object to world space
-    //  return transform(hit, Object::getModelMatrix(obj));
-    //}
+    if (hit.m_id < 0) {
+      return Hit();
+    }
+    else {
+      // transfrom hit, object to world space
+      return transform(hit, mat);
+    }
 
-    return intersect(ray, *obj.m_mesh);
+    return hit;
   }
 
   Hit intersect(const Ray& ray, const Mesh::Mesh& mesh) {
