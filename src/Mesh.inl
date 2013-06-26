@@ -15,16 +15,44 @@
 
 namespace Mesh {
 
+//---------------------------------------------------------
+// Declaration
+//---------------------------------------------------------
+
+  struct Face {
+    glm::uvec3 m_v;
+  };
+
   struct Triangle {
-    glm::ivec3 m_v;
+    glm::vec3 m_v[3];
   };
 
   struct Mesh {
     uint m_numVerts, m_numFaces;
     glm::vec3* m_verts;
-    Triangle* m_faces;
+    Face* m_faces;
     glm::vec3 m_bmin, m_bmax;
   };
+
+  // forward declarations
+  HOST DEVICE extern inline Triangle getTriangle(const Mesh& mesh, const uint index);
+
+//---------------------------------------------------------
+// Function Implementation
+//---------------------------------------------------------
+
+  Triangle getTriangle(const Mesh& mesh, const uint idx) {
+    Triangle tri;
+
+    if (idx > mesh.m_numFaces-1)
+      return tri;
+
+    tri.m_v[0] = mesh.m_verts[mesh.m_faces[idx].m_v[0]];
+    tri.m_v[1] = mesh.m_verts[mesh.m_faces[idx].m_v[1]];
+    tri.m_v[2] = mesh.m_verts[mesh.m_faces[idx].m_v[2]];
+
+    return tri;
+  }
 
 }
 

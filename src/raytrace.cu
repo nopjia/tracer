@@ -28,17 +28,16 @@ __global__ void raytraceKernel(
   const glm::vec3 campos, const glm::vec3 A, const glm::vec3 B, const glm::vec3 C,
   const Object::Object* scene, const uint sceneSize,
   const float time)
-{  
+{ 
   uint x = blockIdx.x*blockDim.x + threadIdx.x;
   uint y = blockIdx.y*blockDim.y + threadIdx.y;
 
   glm::vec2 uv((float)x/w, (float)y/h);
   
-  Ray::Ray ray;
-  ray.m_pos = campos+C
-    + (2.0f*uv.x-1.0f)*A
-    + (2.0f*uv.y-1.0f)*B;
-  ray.m_dir = glm::normalize(ray.m_pos-campos);
+  Ray::Ray ray = {
+    campos+C + (2.0f*uv.x-1.0f)*A + (2.0f*uv.y-1.0f)*B,
+    glm::normalize(ray.m_pos-campos)
+  };
 
   Ray::Hit hit = Ray::intersectScene(ray, scene, sceneSize);
 
@@ -52,7 +51,6 @@ __global__ void raytraceKernel(
   }
 
   pbo_out[y*w + x] = rgbToInt(outcolor);
-  //pbo_out[y*w + x] = rgbToInt(rd);
 }
 
 extern "C" 

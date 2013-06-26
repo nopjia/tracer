@@ -44,17 +44,25 @@ void raytrace(
   const Object::Object* scene, const uint sceneSize,
   const float time);
 
-//void mytest() {
-//  Ray::Ray ray;
-//  Ray::Hit hit;
-//
-//  ray.m_pos = glm::vec3(0.0f, 0.5f, -5.0f);
-//  ray.m_dir = glm::vec3(0.0f, 0.0f, 1.0f);
-//  //hit = Ray::intersect(ray, *scene.data()[1]->m_mesh);  
-//  //hit = Ray::intersect(ray, *scene[1]);
-//  hit = Ray::intersectScene(ray, (const Object::Object**)scene.data(), scene.size());
-//  hit;
-//}
+void mytest() {
+  Ray::Ray ray;
+  Ray::Hit hit;
+
+  ray.m_pos = glm::vec3(0.0f, 0.5f, -5.0f);
+  ray.m_dir = glm::vec3(0.0f, 0.0f, 1.0f);
+  
+  //Mesh::Mesh& mesh = *scene.data()[0]->m_mesh;
+  //Mesh::Triangle* tris = new Mesh::Triangle[mesh.m_numFaces];
+  //for (int i=0; i<mesh.m_numFaces; ++i) {
+  //  std::printf("%i f %u %u %u\n", i, mesh.m_faces[i].m_v[0]+1, mesh.m_faces[i].m_v[1]+1, mesh.m_faces[i].m_v[2]+1);
+  //  tris[i] = Mesh::getTriangle(mesh, i);
+  //}
+
+  hit = Ray::intersect(ray, *scene.data()[1]->m_mesh);  
+  //hit = Ray::intersect(ray, *scene[1]);
+  //hit = Ray::intersectScene(ray, (const Object::Object**)scene.data(), scene.size());
+  hit;
+}
 
 int main(int argc, char **argv) {
   glutInit(&argc, argv);
@@ -93,7 +101,7 @@ int main(int argc, char **argv) {
   loadScene();
   loadSceneCUDA();
 
-  //mytest();
+  mytest();
 
   glutMainLoop();
   cudaThreadExit();
@@ -319,7 +327,7 @@ void loadSceneCUDA() {
     cudaMalloc(&mesh_hd->m_verts, vertsMemSize);
     cudaMemcpy(mesh_hd->m_verts, obj.m_mesh->m_verts, vertsMemSize, cudaMemcpyHostToDevice);
 
-    size_t facesMemSize = obj.m_mesh->m_numFaces*sizeof(Mesh::Triangle);
+    size_t facesMemSize = obj.m_mesh->m_numFaces*sizeof(Mesh::Face);
     cudaMalloc(&mesh_hd->m_faces, facesMemSize);
     cudaMemcpy(mesh_hd->m_faces, obj.m_mesh->m_faces, facesMemSize, cudaMemcpyHostToDevice);
 

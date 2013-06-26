@@ -17,14 +17,19 @@
 
 namespace Ray {
 
+//---------------------------------------------------------
+// Declaration
+//---------------------------------------------------------
+
   struct Ray {
     glm::vec3 m_pos;
     glm::vec3 m_dir;
   };
 
   struct Hit {
-    HOST DEVICE Hit() : m_id(-1){}
+    HOST DEVICE Hit() : m_t(-1.0f), m_id(-1){}
 
+    float m_t;
     int m_id;  // object ID
     glm::vec3 m_pos;
     glm::vec3 m_nor;
@@ -36,7 +41,7 @@ namespace Ray {
   HOST DEVICE extern inline Hit intersectScene(const Ray& ray, const Object::Object* scene, const uint size);
   HOST DEVICE extern inline Hit intersect(const Ray& ray, const Object::Object& obj);
   HOST DEVICE extern inline Hit intersect(const Ray& ray, const Mesh::Mesh& mesh);
-  HOST DEVICE extern inline Hit intersect(const Ray& ray, const Mesh::Triangle& tri);
+  HOST DEVICE extern inline float intersect(const Ray& ray, const glm::vec3& p0, const glm::vec3& p1, const glm::vec3& p2);
   
 //---------------------------------------------------------
 // Function Implementation
@@ -121,15 +126,45 @@ namespace Ray {
     }
     // ray intersects all 3 slabs, return
     Hit hit;
-    hit.m_id = 1; // YES HIT at Mesh level
-    hit.m_pos = ray.m_pos + ray.m_dir*tmin;
-    return hit;
+    hit.m_id = 1; // YES HIT at Mesh level    
     
-    // TODO: loop triangles and return intersection
+    // loop triangles and return intersection
+//    hit.m_t = tmin;
+    hit.m_t = FLT_MAX;
+    for (int i=0; i<mesh.m_numFaces; ++i) {      
+      float thit = intersect(ray, 
+        mesh.m_verts[mesh.m_faces[i].m_v[0]], 
+        mesh.m_verts[mesh.m_faces[i].m_v[1]], 
+        mesh.m_verts[mesh.m_faces[i].m_v[2]]);
+      if (thit > 0.0f && thit < hit.m_t)
+        hit.m_t = thit;
+    }
+
+    hit.m_pos = ray.m_pos + ray.m_dir*hit.m_t;
+    return hit;
   }
 
-  Hit intersect(const Ray& ray, const Mesh::Triangle& tri) {
-    return Hit();
+  float intersect(const Ray& ray, const glm::vec3& p0, const glm::vec3& p1, const glm::vec3& p2) {
+    glm::vec3 e1 = p1-p0;
+    glm::vec3 e2 = p2-p0;
+
+    glm::vec3 pvec = glm::cross(ray.m_dir, e2);
+    float det = glm::dot(e1, pvec);
+    if (glm::abs(det) < EPS)
+      return -1.0f;
+
+    det = 1.0f / det;
+    glm::vec3 tvec = ray.m_pos- p0;
+    float u = glm::dot(tvec, pvec) * det;
+    if (u < 0.0f || u > 1.0f)
+      return -1.0f;
+
+    glm::vec3 qvec = glm::cross(tvec, e1);
+    float v = glm::dot(ray.m_dir, qvec) * det;
+    if (v < 0.0f || (u + v) > 1.0f)
+      return -1.0f;
+
+    return glm::dot(e2, qvec) * det;
   }
 }
 

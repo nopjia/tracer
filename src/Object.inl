@@ -18,7 +18,7 @@
 namespace Object {
 
 //---------------------------------------------------------
-// Struct
+// Declaration
 //---------------------------------------------------------
 
   struct Object {
@@ -49,14 +49,6 @@ namespace Object {
 
     return obj;
   }
-
-  //glm::mat4 getModelMatrix(const Object& obj) {
-  //  glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), obj.m_scale);
-  //  glm::mat4 rotationMatrix = glm::toMat4(obj.m_rotationQuat);
-  //  glm::mat4 transformationMatrix = rotationMatrix * scaleMatrix;
-  //  transformationMatrix[3] = glm::vec4(obj.m_translation, 1.0f);
-  //  return transformationMatrix;
-  //}
 
 #define UPDATE_MAT_I() (obj.m_matrixi = glm::inverse(obj.m_matrix))
 
