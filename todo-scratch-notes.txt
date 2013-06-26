@@ -7,6 +7,8 @@ fix xyz directions
 
 -----
 
+bug: obj loader need endline at end of .obj file
+
 optimize intersections
 use tmin for intersection comparison
 

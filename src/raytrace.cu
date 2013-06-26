@@ -39,6 +39,8 @@ __global__ void raytraceKernel(
     glm::normalize(ray.m_pos-campos)
   };
 
+  glm::vec3 lightDir( 0.57735, 0.57735, 0.57735 );
+
   Ray::Hit hit = Ray::intersectScene(ray, scene, sceneSize);
 
   glm::vec3 outcolor;
@@ -48,6 +50,7 @@ __global__ void raytraceKernel(
   }
   else {
     outcolor = scene[hit.m_id].m_material.m_color;
+    outcolor *= KA + KD*glm::max(glm::dot(lightDir,hit.m_nor),0.0f);
   }
 
   pbo_out[y*w + x] = rgbToInt(outcolor);

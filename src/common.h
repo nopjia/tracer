@@ -8,32 +8,37 @@ typedef unsigned int uint;
 // constants
 #define EPS 0.001f
 
-const uint WINDOW_W = 640;
-const uint WINDOW_H = 480;
-const uint PIXSCALE = 2;
+#define WINDOW_W    640
+#define WINDOW_H    480
+#define PIXSCALE    2
+#define DELTA_T     0.1f
+#define BLOCK_SIZE  32
 
-const float DELTA_T = 0.1f;
-const uint BLOCK_SIZE = 32;
+// lighting constants
+#define KD 0.7
+#define KA 0.3
 
-// Vertex attribute indexes
-const uint POSITION_ATTR                    = 0;
-const uint NORMAL_ATTR                      = 1;
-const uint UV_ATTR                          = 2;
 
-// Uniform buffer objects binding points
-const uint PER_FRAME_UBO_BINDING            = 0;
-const uint LIGHT_UBO_BINDING                = 1;
-const uint MESH_MATERIAL_ARRAY_BINDING      = 2;
-const uint POSITION_ARRAY_BINDING           = 3;
 
-// Sampler binding points
-const uint UNUSED_TEXTURE                   = 0;
-const uint RENDER_TEXTURE                   = 1;
+// vertex attribute indexes
+#define POSITION_ATTR                 0
+#define NORMAL_ATTR                   1
+#define UV_ATTR                       2
 
-// Max values
-const uint MAX_TEXTURE_ARRAYS               = 10;
-const uint NUM_OBJECTS_MAX                  = 500;
-const uint NUM_MESHES_MAX                   = 500;
-const uint MAX_POINT_LIGHTS                 = 8;
+// uniform buffer binding points
+#define PER_FRAME_UBO_BINDING         0
+#define LIGHT_UBO_BINDING             1
+#define MESH_MATERIAL_ARRAY_BINDING   2
+#define POSITION_ARRAY_BINDING        3
+
+// sampler binding points
+#define UNUSED_TEXTURE                0
+#define RENDER_TEXTURE                1
+
+// max values
+#define MAX_TEXTURE_ARRAYS            10
+#define NUM_OBJECTS_MAX               500
+#define NUM_MESHES_MAX                500
+#define MAX_POINT_LIGHTS              8
 
 #endif  // COMMON_H

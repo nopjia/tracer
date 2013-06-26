@@ -69,7 +69,7 @@ namespace Ray {
 
     for (int i=0; i<size; ++i) {
       Hit h ( intersect(ray, scene[i]) );
-      if (h.m_id > 0) {
+      if (h.m_id >= 0) {
         glm::vec3 subtract = ray.m_pos - h.m_pos;
         float dist = glm::dot(subtract,subtract);
         if (dist<mindist) {
@@ -126,7 +126,6 @@ namespace Ray {
     }
     // ray intersects all 3 slabs, return
     Hit hit;
-    hit.m_id = 1; // YES HIT at Mesh level    
     
     // loop triangles and return intersection
     hit.m_t = FLT_MAX;
@@ -135,11 +134,15 @@ namespace Ray {
         mesh.m_verts[mesh.m_faces[i].m_v[0]], 
         mesh.m_verts[mesh.m_faces[i].m_v[1]], 
         mesh.m_verts[mesh.m_faces[i].m_v[2]]);
-      if (thit > 0.0f && thit < hit.m_t)
+      if (thit > 0.0f && thit < hit.m_t) {
         hit.m_t = thit;
+        hit.m_id = i;  // face ID
+      }
     }
 
-    hit.m_pos = ray.m_pos + ray.m_dir*hit.m_t;
+    hit.m_pos = ray.m_pos + ray.m_dir*hit.m_t;    
+    hit.m_nor = mesh.m_norms[mesh.m_faces[hit.m_id].m_n[0]];  // TODO interp
+    
     return hit;
   }
 

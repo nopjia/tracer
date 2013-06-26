@@ -60,6 +60,7 @@ namespace Mesh {
         }
       
         f.m_v -= 1;   // start at index 0
+        f.m_n -= 1;
         faces.push_back(f);
       }
     }
@@ -97,7 +98,9 @@ namespace Mesh {
     }
 
     //for (int i=0; i<mesh->m_numVerts; ++i)
-    //  std::printf("%i f %f %f %f\n", i, mesh->m_verts[i].x, mesh->m_verts[i].y, mesh->m_verts[i].z);
+    //  std::printf("%i v %f %f %f\n", i, mesh->m_verts[i].x, mesh->m_verts[i].y, mesh->m_verts[i].z);
+    //for (int i=0; i<mesh->m_numNorms; ++i)
+    //  std::printf("%i vn %f %f %f\n", i, mesh->m_norms[i].x, mesh->m_norms[i].y, mesh->m_norms[i].z);
     //for (int i=0; i<mesh->m_numFaces; ++i)
     //  std::printf("%i f %u %u %u\n", i, mesh->m_faces[i].m_v[0]+1, mesh->m_faces[i].m_v[1]+1, mesh->m_faces[i].m_v[2]+1);
 
