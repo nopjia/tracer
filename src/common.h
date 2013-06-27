@@ -30,7 +30,7 @@ typedef unsigned int uint;
 
 // rendering constants
 #define FOV 30
-#define PATH_DEPTH  8
+#define PATH_DEPTH  2
 
 #define THFL_PATH_RUN   0x0001
 
