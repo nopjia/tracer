@@ -121,6 +121,7 @@
     <None Include="src\shaders\globals" />
     <None Include="src\shaders\standard.frag" />
     <None Include="src\shaders\standard.vert" />
+    <None Include="src\Utils.inl" />
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="src\raytrace.cu" />

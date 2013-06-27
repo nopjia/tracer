@@ -67,6 +67,9 @@
     <None Include="src\Ray.inl">
       <Filter>src</Filter>
     </None>
+    <None Include="src\Utils.inl">
+      <Filter>src</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="src\raytrace.cu">

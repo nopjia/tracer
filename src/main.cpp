@@ -7,13 +7,12 @@
 #include "Ray.inl"
 
 namespace {
+  uint image_width = WINDOW_W / PIXSCALE;
+  uint image_height = WINDOW_H / PIXSCALE;
   int mouseX, mouseY;
   int mouseButtons = 0;   // 0x1 left, 0x2 middle, 0x4 right
   float timer = 0.0f;
   uint frameCount = 0, timeBase = 0;
-
-  uint image_width = WINDOW_W / PIXSCALE;
-  uint image_height = WINDOW_H / PIXSCALE;
 
   GLuint pbo;               // pbo for CUDA and openGL
   GLuint result_texture;    // render result copied to this openGL texture
@@ -23,6 +22,10 @@ namespace {
   std::vector<Object::Object*> scene;
   Object::Object* scene_d;  // pointer to device
   Ray::Ray* rays_d;
+  glm::vec3* col_d;
+  glm::vec3* film_d;
+  uint filmAccumNum = 1;
+  bool moved = false;
 }
 
 // global methods
@@ -41,11 +44,12 @@ void motion(int x, int y);
 
 extern "C"
 void raytrace(
-  uint* pbo_out, Ray::Ray* rays_d,
-  const uint w, const uint h,
+  uint* pbo_out, const uint w, const uint h, const float time,
   const glm::vec3& campos, const glm::vec3& A, const glm::vec3& B, const glm::vec3& C,
-  const Object::Object* scene, const uint sceneSize,
-  const float time);
+  const Object::Object* scene_d, const uint sceneSize,
+  Ray::Ray* rays_d,
+  glm::vec3* col_d,
+  glm::vec3* film_d, const uint filmAccumNum);
 
 void mytest() {
   Ray::Ray ray;
@@ -193,14 +197,17 @@ void motion(int x, int y) {
   if (mouseButtons & 0x1) {
     const float FACTOR = -0.05f;
     camera.rotate(FACTOR*dx, FACTOR*dy);
+    moved = true;
   }
   else if (mouseButtons & 0x2) {
     const float FACTOR = 0.05f;
     camera.pan(-FACTOR*dx, FACTOR*dy);
+    moved = true;
   }
   else if (mouseButtons & 0x4) {
     const float FACTOR = 0.05f;
     camera.zoom(FACTOR*dy);
+    moved = true;
   }
 
   mouseX = x;
@@ -284,15 +291,24 @@ void raytrace() {
     B *= tanFOV;
   }
 
+  // film  
+  if (moved) {
+    filmAccumNum = 1;
+    moved = false;
+  }
+  else {
+    ++filmAccumNum;
+  }
+
   // cuda call
   unsigned int* out_data;
 	checkCudaErrors(cudaGLMapBufferObject((void**)&out_data, pbo));
   
-  raytrace(out_data, rays_d,
-    image_width, image_height,
+  raytrace(out_data, image_width, image_height, timer,
     camera.getPosition(),A,B,C,
     scene_d, scene.size(),
-    timer);
+    rays_d,col_d,
+    film_d, filmAccumNum);
 
 	checkCudaErrors(cudaGLUnmapBufferObject(pbo));
 
@@ -315,7 +331,7 @@ void loadScene() {
   Object::scale(*obj, glm::vec3(0.5f, 2.0f, 1.0f));
   Object::translate(*obj, glm::vec3(4.0f, -2.0f, 1.0f));
   obj->m_material.m_color = glm::vec3(1.0f);
-  obj->m_material.m_emissivity = 1.0f;
+  obj->m_material.m_emit = glm::vec3(1.0f);
   scene.push_back(obj);
 
   obj = Object::newObject(Mesh::loadObj("data/unitcube_inv.obj"));
@@ -329,8 +345,9 @@ void loadScene() {
 }
 
 void initMemoryCUDA() {
-  size_t raysMemSize = image_width*image_height*sizeof(Ray::Ray);
-  cudaMalloc(&rays_d, raysMemSize);
+  cudaMalloc(&rays_d, image_width*image_height*sizeof(Ray::Ray));
+  cudaMalloc(&col_d, image_width*image_height*sizeof(glm::vec3));
+  cudaMalloc(&film_d, image_width*image_height*sizeof(glm::vec3));
 }
 
 void loadSceneCUDA() {

@@ -3,6 +3,7 @@
 #include "common.h"
 #include "Object.inl"
 #include "Ray.inl"
+#include "Utils.inl"
 
 // convert floating point rgb color to 8-bit integer
 __device__ int rgbToInt(float r, float g, float b)
@@ -22,61 +23,79 @@ __device__ int rgbToInt(glm::vec3 c)
   return (int(c.r*255.0)<<16) | (int(c.g*255.0)<<8) | int(c.b*255.0);
 }
 
-__global__ void calcInitRaysKernel(
-  Ray::Ray* rays,
+__global__ void initBuffers(
   const uint w, const uint h,
-  const glm::vec3 campos, const glm::vec3 A, const glm::vec3 B, const glm::vec3 C
-  )
+  const glm::vec3 campos, const glm::vec3 A, const glm::vec3 B, const glm::vec3 C,
+  Ray::Ray* rays, glm::vec3* col,
+  glm::vec3* film, uint filmAccumNum)
 {
   uint x = blockIdx.x*blockDim.x + threadIdx.x;
   uint y = blockIdx.y*blockDim.y + threadIdx.y;
   uint idx = y*w + x;
 
+  // calc camera rays
   glm::vec2 uv((float)x/w, (float)y/h);  
-
   rays[idx].m_pos = campos+C + (2.0f*uv.x-1.0f)*A + (2.0f*uv.y-1.0f)*B;
   rays[idx].m_dir = glm::normalize(rays[idx].m_pos-campos);
+
+  // reset color buffer
+  col[idx] = glm::vec3(1.0f);
+
+  if (filmAccumNum==1)
+    film[idx] = glm::vec3(0.0f);
 }
 
 __global__ void calcColorKernel(
-  uint *pbo_out, const uint w, const uint h,
-  const Ray::Ray* rays,
-  const Object::Object* scene, const uint sceneSize)
+  const uint w, const uint h, const float time,
+  const Object::Object* scene, const uint sceneSize,  
+  Ray::Ray* rays,
+  glm::vec3* col)
 { 
   uint x = blockIdx.x*blockDim.x + threadIdx.x;
   uint y = blockIdx.y*blockDim.y + threadIdx.y;
   uint idx = y*w + x;
 
-  glm::vec3 lightDir(-0.534522, 0.801784, 0.267261);
-
   Ray::Hit hit = Ray::intersectScene(rays[idx], scene, sceneSize);
-
-  glm::vec3 outcolor;
   
   if (hit.m_id < 0) {
-    outcolor = rays[idx].m_dir;
+    col[idx] = glm::vec3(0.0f);
   }
   else {
-    outcolor = scene[hit.m_id].m_material.m_color;
-    outcolor *= glm::max(glm::dot(lightDir,hit.m_nor),0.0f);
+    col[idx] *= scene[hit.m_id].m_material.m_color * scene[hit.m_id].m_material.m_brdf;
+    //rays[idx].m_dir = glm::reflect(rays[idx].m_dir, hit.m_nor);
+    rays[idx].m_dir = Utils::randVectorHem(glm::vec3(x,y,time),hit.m_nor);
+    rays[idx].m_pos = hit.m_pos + EPS*rays[idx].m_dir;
   }
-
-  pbo_out[idx] = rgbToInt(outcolor);
 }
+
+__global__ void accumColorKernel(
+  const uint w, const uint h,
+  uint* pbo_out,
+  glm::vec3* col,
+  glm::vec3* film, const float filmAccumNum)
+{
+  uint x = blockIdx.x*blockDim.x + threadIdx.x;
+  uint y = blockIdx.y*blockDim.y + threadIdx.y;
+  uint idx = y*w + x;
+
+  film[idx] += col[idx];
+  pbo_out[idx] = rgbToInt(film[idx]/filmAccumNum);
+}
+
 
 extern "C"
 void raytrace(
-  uint* pbo_out, Ray::Ray* rays_d,
-  const uint w, const uint h,
+  uint* pbo_out, const uint w, const uint h, const float time,
   const glm::vec3& campos, const glm::vec3& A, const glm::vec3& B, const glm::vec3& C,
-  const Object::Object* scene, const uint sceneSize,
-  const float time)
+  const Object::Object* scene_d, const uint sceneSize,
+  Ray::Ray* rays_d,
+  glm::vec3* col_d,
+  glm::vec3* film_d, const uint filmAccumNum)
 {
   dim3 block(8,8);
 	dim3 grid(w/block.x,h/block.y);
-  calcInitRaysKernel<<<grid, block>>>(rays_d,w,h,campos,A,B,C);
-
-  //for (int i=0; i<PATH_DEPTH; ++i) {
-    calcColorKernel<<<grid, block>>>(pbo_out,w,h,rays_d,scene,sceneSize);
-  //}
+  initBuffers<<<grid, block>>>(w,h,campos,A,B,C,rays_d,col_d,film_d,filmAccumNum);
+  for (int i=0; i<PATH_DEPTH; ++i)
+    calcColorKernel<<<grid, block>>>(w,h,time,scene_d,sceneSize,rays_d,col_d);
+  accumColorKernel<<<grid, block>>>(w,h,pbo_out,col_d,film_d,filmAccumNum);
 }
