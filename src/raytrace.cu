@@ -151,12 +151,19 @@ void raytrace(
   dim3 block(BLOCK_SIZE,BLOCK_SIZE);
 	dim3 grid(w/block.x,h/block.y);
 
-#ifdef TEST_TRACE
-  testKernel<<<grid, block>>>(w,h,campos,A,B,C,pbo_out,scene_d,sceneSize);
-#else
   initBuffersKernel<<<grid, block>>>(w,h,campos,A,B,C,rays_d,col_d,flags_d,film_d,filmIters);
   for (int i=0; i<PATH_DEPTH; ++i)
     calcColorKernel<<<grid, block>>>(w,h,time,scene_d,sceneSize,rand_d,flags_d,rays_d,col_d,i);
   accumColorKernel<<<grid, block>>>(w,h,pbo_out,col_d,film_d,filmIters);
-#endif
+}
+
+extern "C"
+void testtrace(
+  uint* pbo_out, const uint w, const uint h, const float time,
+  const glm::vec3& campos, const glm::vec3& A, const glm::vec3& B, const glm::vec3& C,
+  const Object::Object* scene_d, const uint sceneSize)
+{
+  dim3 block(BLOCK_SIZE,BLOCK_SIZE);
+	dim3 grid(w/block.x,h/block.y);
+  testKernel<<<grid, block>>>(w,h,campos,A,B,C,pbo_out,scene_d,sceneSize);
 }
