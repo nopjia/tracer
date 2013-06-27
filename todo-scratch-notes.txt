@@ -21,6 +21,8 @@ wave-front kernels
 
 kd-tree: obj tree, scene tree
 
+exit / cleanup CUDA correctly?
+
 -----
 
 bug: obj loader need endline at end of .obj file

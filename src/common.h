@@ -29,12 +29,13 @@ typedef unsigned int uint;
 #define BLOCK_SIZE  32
 
 // rendering constants
-#define PATH_DEPTH  3
+#define PATH_DEPTH  8
 
 #define THFL_PATH_RUN   0x0001
 
 // options
 #define TRI_NORM_INTERP
+//#define TEST_TRACE
 
 
 

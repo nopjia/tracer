@@ -42,8 +42,8 @@ namespace Object {
 
   Object* newObject(Mesh::Mesh* mesh) {
     Object* obj = (Object*)malloc(sizeof(Object));
-    obj->m_matrix = glm::mat4();
-    obj->m_matrixi = glm::mat4();
+    obj->m_matrix = glm::mat4(1.0f);
+    obj->m_matrixi = glm::mat4(1.0f);
     obj->m_mesh = mesh;
     obj->m_material = Material::Material();
 
