@@ -81,7 +81,7 @@ __global__ void initBuffersKernel(
   if (filmIters==1)
     film[idx] = glm::vec3(0.0f);
 
-  flags[idx] = THFL_PATH_RUN;
+  flags[idx] = THFL_NONE | THFL_PATH_RUN;
 }
 
 __global__ void calcColorKernel(
@@ -92,7 +92,8 @@ __global__ void calcColorKernel(
   Ray::Ray* rays,
   glm::vec3* col,
   const uint depth)
-{ 
+{
+
   uint x = blockIdx.x*blockDim.x + threadIdx.x;
   uint y = blockIdx.y*blockDim.y + threadIdx.y;
   uint idx = y*w + x;
@@ -100,6 +101,7 @@ __global__ void calcColorKernel(
   if (!flags[idx]&THFL_PATH_RUN)
     return;
 
+  // intersection test
   Ray::Hit hit = Ray::intersectScene(rays[idx], scene, sceneSize);
   
   // intersects nothing, kill path
@@ -111,18 +113,22 @@ __global__ void calcColorKernel(
   
   // intersects light, kill path
   if (scene[hit.m_id].m_material.m_emit > 0.0f) {
-    col[idx] *= scene[hit.m_id].m_material.m_color* scene[hit.m_id].m_material.m_emit;
+    col[idx] *= scene[hit.m_id].m_material.m_color*scene[hit.m_id].m_material.m_emit;
     flags[idx] &= !THFL_PATH_RUN;
   }
   else {    
-    // hit max path depth, does not contribute color
+    // at max depth, no light, does not contribute color
     if (depth == PATH_DEPTH-1) {
       col[idx] = glm::vec3(0.0f);
       return;
     }
 
     col[idx] *= scene[hit.m_id].m_material.m_color;// * scene[hit.m_id].m_material.m_brdf;
-    rays[idx].m_dir = Utils::randVectorHem(rand[idx].x,rand[idx].y,hit.m_nor);
+
+    if (scene[hit.m_id].m_material.m_type == Material::DIFF)
+      rays[idx].m_dir = Utils::randVectorHem(rand[idx].x,rand[idx].y,hit.m_nor);
+    else if (scene[hit.m_id].m_material.m_type == Material::MIRR)
+      rays[idx].m_dir = glm::reflect(rays[idx].m_dir, hit.m_nor);
     rays[idx].m_pos = hit.m_pos + EPS*rays[idx].m_dir;
   }
 }
@@ -139,6 +145,7 @@ __global__ void accumColorKernel(
 
   film[idx] += col[idx];
   pbo_out[idx] = rgbToInt(film[idx]/filmIters);
+  //pbo_out[idx] = rgbToInt(col[idx]);
 }
 
 extern "C"
@@ -157,8 +164,8 @@ void pathtrace(
   curandSetPseudoRandomGeneratorSeed(gen, time*10.0f);
   curandGenerateUniform(gen, (float*)rand_d, 3*w*h);
 
-  dim3 block(BLOCK_SIZE,BLOCK_SIZE);
-	dim3 grid(w/block.x,h/block.y);
+  dim3 block(BLOCK_SIZE, BLOCK_SIZE);
+	dim3 grid(w/block.x, h/block.y);
 
   initBuffersKernel<<<grid, block>>>(
     w,h,campos,A,B,C,rand_d,flags_d,rays_d,col_d,film_d,filmIters

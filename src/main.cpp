@@ -363,7 +363,7 @@ void loadScene() {
   Object::rotate(*obj, glm::angleAxis(180.0f, glm::vec3(1.0f, 0.0f, 0.0f)));
   Object::scale(*obj, BOX_HDIM*2.0f);
   Object::translate(*obj, glm::vec3(0.0f, BOX_HDIM.y, 0.0f));
-  obj->m_material.m_color = glm::vec3(1.0f);
+  obj->m_material.m_color = glm::vec3(1.0f, 1.0f, 1.0f);
   obj->m_material.m_emit = 2.0f;
   scene.push_back(obj);
   // back -z
@@ -411,7 +411,8 @@ void loadScene() {
   obj = Object::newObject(Mesh::loadObj("data/icosahedron.obj"));
   Object::scale(*obj, 2.0f);
   Object::translate(*obj, glm::vec3(0.0f, -3.0f, 0.0f));
-  obj->m_material.m_color = glm::vec3(1.0, 1.0, 0.0);
+  obj->m_material.m_color = glm::vec3(1.0, 0.5, 1.0);
+  obj->m_material.m_type = Material::MIRR;
   scene.push_back(obj);
 }
 
