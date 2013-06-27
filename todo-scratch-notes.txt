@@ -25,4 +25,6 @@ exit / cleanup CUDA correctly?
 
 -----
 
+FIX NOW : BUG : ray intersection, distortion
+
 bug: obj loader need endline at end of .obj file

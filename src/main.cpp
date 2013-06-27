@@ -140,14 +140,15 @@ void initGL() {
   glDisable(GL_DEPTH_TEST);
   
   fullScreenQuad.begin();
-  camera.setAspectRatio(WINDOW_W, WINDOW_H);
+  camera.setFOV(FOV);
+  camera.setAspect(WINDOW_W, WINDOW_H);
   camera.zoom(-5.0f);
   camera.update();
 }
 
 void resize(int width, int height) {
   glViewport(0, 0, width, height);
-  camera.setAspectRatio(WINDOW_W, WINDOW_H);
+  camera.setAspect(WINDOW_W, WINDOW_H);
 }
 
 void getFPS() {

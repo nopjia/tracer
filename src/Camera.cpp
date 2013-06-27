@@ -8,8 +8,8 @@ m_currXZRads(0.0f),
 m_currYRads(0.0f),
 m_nearPlane(0.1f),
 m_farPlane(1000.0f),
-m_fieldOfView(45.0f),
-m_aspectRatio(1.0f),
+m_fov(45.0f),
+m_aspect(1.0f),
 m_upDir(0.0f, 1.0f, 0.0f),
 m_lookDir(0.0f, 0.0f, 1.0f),
 m_rightDir(glm::cross(m_lookDir, m_upDir))
@@ -20,36 +20,43 @@ Camera::~Camera()
 {
 }
 
-void Camera::setAspectRatio(uint screenWidth, uint screenHeight)
-{
-  m_aspectRatio = (float)screenWidth / screenHeight;
-}
-
-void Camera::setFarNearPlanes(float nearPlane, float farPlane)
-{
-  m_nearPlane = nearPlane;
-  m_farPlane = farPlane;
-}
-
 void Camera::rotateDegrees(float x, float y)
 {
   rotate(glm::radians(x), glm::radians(y));
 }
 
-glm::vec3 Camera::getPosition() {
+void Camera::setAspect(uint screenWidth, uint screenHeight)
+{
+  m_aspect = (float)screenWidth / screenHeight;
+}
+void Camera::setFarNearPlanes(float nearPlane, float farPlane)
+{
+  m_nearPlane = nearPlane;
+  m_farPlane = farPlane;
+}
+void Camera::setFOV(float fov)
+{
+  m_fov = fov;
+}
+glm::vec3 Camera::getPosition() 
+{
   return m_position;
 }
-glm::vec3 Camera::getLookAt() {
+glm::vec3 Camera::getLookAt() 
+{
   return m_lookAt;
 }
-glm::vec3 Camera::getUp() {
+glm::vec3 Camera::getUp() 
+{
   return m_upDir;
 }
-float Camera::getAspect() {
-  return m_aspectRatio;
+float Camera::getAspect() 
+{
+  return m_aspect;
 }
-float Camera::getFOV() {
-  return m_fieldOfView;
+float Camera::getFOV() 
+{
+  return m_fov;
 }
 
 

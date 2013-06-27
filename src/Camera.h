@@ -19,7 +19,8 @@ public:
   virtual void zoom(float delta) = 0;
   virtual void update() = 0;
 
-  void setAspectRatio(uint screenWidth, uint screenHeight);
+  void setAspect(uint screenWidth, uint screenHeight);
+  void setFOV(float fov);
   void setFarNearPlanes(float nearPlane, float farPlane);
 
   glm::vec3 getPosition();
@@ -40,8 +41,8 @@ protected:
 
   float m_nearPlane;
   float m_farPlane;
-  float m_fieldOfView; //degrees
-  float m_aspectRatio;
+  float m_fov; //degrees
+  float m_aspect;
 
   float m_rotationAmount;
   float m_panAmount;
