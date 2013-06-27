@@ -10,6 +10,7 @@ namespace {
   int mouseX, mouseY;
   int mouseButtons = 0;   // 0x1 left, 0x2 middle, 0x4 right
   float timer = 0.0f;
+  uint frameCount = 0, timeBase = 0;
 
   uint image_width = WINDOW_W / PIXSCALE;
   uint image_height = WINDOW_H / PIXSCALE;
@@ -143,6 +144,24 @@ void resize(int width, int height) {
   camera.setAspectRatio(WINDOW_W, WINDOW_H);
 }
 
+void getFPS() {
+  ++frameCount;
+  uint currTime = glutGet(GLUT_ELAPSED_TIME);
+
+  uint elapsed = currTime - timeBase;
+  if (elapsed > 1000) {
+    float fps = frameCount*1000.0f/(elapsed);
+    float milisecs = elapsed / frameCount;
+    timeBase = currTime;
+    frameCount = 0;
+
+    char buffer[32];
+    sprintf(buffer, "%.4f : %.0f", fps, milisecs);
+    glutSetWindowTitle(buffer);
+  }
+
+}
+
 void draw() {
   timer += DELTA_T;
 
@@ -154,6 +173,7 @@ void draw() {
   fullScreenQuad.display();
 
   glutSwapBuffers();
+  getFPS();
 }
 
 void keyboard(unsigned char key, int x, int y) {
