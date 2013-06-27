@@ -142,7 +142,7 @@ void initGL() {
   fullScreenQuad.begin();
   camera.setFOV(FOV);
   camera.setAspect(WINDOW_W, WINDOW_H);
-  camera.zoom(-5.0f);
+  camera.zoom(-10.0f);
   camera.update();
 }
 

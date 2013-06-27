@@ -59,7 +59,8 @@ __global__ void testKernel(
 __global__ void initBuffersKernel(
   const uint w, const uint h,
   const glm::vec3 campos, const glm::vec3 A, const glm::vec3 B, const glm::vec3 C,
-  Ray::Ray* rays, glm::vec3* col, uint* flags,
+  glm::vec3* rand, uint* flags,
+  Ray::Ray* rays, glm::vec3* col, 
   glm::vec3* film, uint filmIters)
 {
   uint x = blockIdx.x*blockDim.x + threadIdx.x;
@@ -67,7 +68,10 @@ __global__ void initBuffersKernel(
   uint idx = y*w + x;
   
   // calc camera rays
-  glm::vec2 uv((float)x/w, (float)y/h);
+  glm::vec2 uv(
+    (float)x/w + (2.0f*rand[idx].x+1.0f)/w, 
+    (float)y/h + (2.0f*rand[idx].y+1.0f)/h
+  );
   rays[idx].m_pos = campos+C + (2.0f*uv.x-1.0f)*A + (2.0f*uv.y-1.0f)*B;
   rays[idx].m_dir = glm::normalize(rays[idx].m_pos-campos);
 
@@ -152,9 +156,13 @@ void raytrace(
   dim3 block(BLOCK_SIZE,BLOCK_SIZE);
 	dim3 grid(w/block.x,h/block.y);
 
-  initBuffersKernel<<<grid, block>>>(w,h,campos,A,B,C,rays_d,col_d,flags_d,film_d,filmIters);
+  initBuffersKernel<<<grid, block>>>(
+    w,h,campos,A,B,C,rand_d,flags_d,rays_d,col_d,film_d,filmIters
+  );
   for (int i=0; i<PATH_DEPTH; ++i)
-    calcColorKernel<<<grid, block>>>(w,h,time,scene_d,sceneSize,rand_d,flags_d,rays_d,col_d,i);
+    calcColorKernel<<<grid, block>>>(
+      w,h,time,scene_d,sceneSize,rand_d,flags_d,rays_d,col_d,i
+    );
   accumColorKernel<<<grid, block>>>(w,h,pbo_out,col_d,film_d,filmIters);
 }
 
