@@ -18,11 +18,11 @@ namespace Material {
   struct Material {
     HOST DEVICE Material() : 
       m_color(glm::vec3(0.5f)), 
-      m_emit(glm::vec3(0.0f)),
+      m_emit(0.0f),
       m_brdf(1.0f){}
 
     glm::vec3 m_color;
-    glm::vec3 m_emit;
+    float m_emit;
     float m_brdf;
   };
 

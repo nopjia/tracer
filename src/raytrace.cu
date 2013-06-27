@@ -1,4 +1,5 @@
 #include <cuda_runtime.h>
+#include <curand.h>
 #include <glm/glm.hpp>
 #include "common.h"
 #include "Object.inl"
@@ -26,8 +27,8 @@ __device__ int rgbToInt(glm::vec3 c)
 __global__ void initBuffers(
   const uint w, const uint h,
   const glm::vec3 campos, const glm::vec3 A, const glm::vec3 B, const glm::vec3 C,
-  Ray::Ray* rays, glm::vec3* col,
-  glm::vec3* film, uint filmAccumNum)
+  Ray::Ray* rays, glm::vec3* col, uint* flags,
+  glm::vec3* film, uint filmIters)
 {
   uint x = blockIdx.x*blockDim.x + threadIdx.x;
   uint y = blockIdx.y*blockDim.y + threadIdx.y;
@@ -41,19 +42,27 @@ __global__ void initBuffers(
   // reset color buffer
   col[idx] = glm::vec3(1.0f);
 
-  if (filmAccumNum==1)
+  if (filmIters==1)
     film[idx] = glm::vec3(0.0f);
+
+  flags[idx] = THFL_PATH_RUN;
 }
 
 __global__ void calcColorKernel(
   const uint w, const uint h, const float time,
-  const Object::Object* scene, const uint sceneSize,  
+  const Object::Object* scene, const uint sceneSize,
+  glm::vec3* rand,
+  uint* flags,
   Ray::Ray* rays,
-  glm::vec3* col)
+  glm::vec3* col,
+  const uint depth)
 { 
   uint x = blockIdx.x*blockDim.x + threadIdx.x;
   uint y = blockIdx.y*blockDim.y + threadIdx.y;
   uint idx = y*w + x;
+
+  if (!flags[idx]&THFL_PATH_RUN)
+    return;
 
   Ray::Hit hit = Ray::intersectScene(rays[idx], scene, sceneSize);
   
@@ -61,10 +70,20 @@ __global__ void calcColorKernel(
     col[idx] = glm::vec3(0.0f);
   }
   else {
-    col[idx] *= scene[hit.m_id].m_material.m_color * scene[hit.m_id].m_material.m_brdf;
-    //rays[idx].m_dir = glm::reflect(rays[idx].m_dir, hit.m_nor);
-    rays[idx].m_dir = Utils::randVectorHem(glm::vec3(x,y,time),hit.m_nor);
-    rays[idx].m_pos = hit.m_pos + EPS*rays[idx].m_dir;
+    if (scene[hit.m_id].m_material.m_emit > 0.0f) {
+      col[idx] *= scene[hit.m_id].m_material.m_color* scene[hit.m_id].m_material.m_emit;
+      flags[idx] &= !THFL_PATH_RUN;
+    }
+    else {
+      if (depth == PATH_DEPTH-1) {
+        col[idx] = glm::vec3(0.0f);
+      }
+      else {
+        col[idx] *= scene[hit.m_id].m_material.m_color * scene[hit.m_id].m_material.m_brdf;
+        rays[idx].m_dir = Utils::randVectorHem(rand[idx].x,rand[idx].y,hit.m_nor);
+        rays[idx].m_pos = hit.m_pos + EPS*rays[idx].m_dir;
+      }
+    }    
   }
 }
 
@@ -72,30 +91,36 @@ __global__ void accumColorKernel(
   const uint w, const uint h,
   uint* pbo_out,
   glm::vec3* col,
-  glm::vec3* film, const float filmAccumNum)
+  glm::vec3* film, const float filmIters)
 {
   uint x = blockIdx.x*blockDim.x + threadIdx.x;
   uint y = blockIdx.y*blockDim.y + threadIdx.y;
   uint idx = y*w + x;
 
   film[idx] += col[idx];
-  pbo_out[idx] = rgbToInt(film[idx]/filmAccumNum);
+  pbo_out[idx] = rgbToInt(film[idx]/filmIters);
 }
-
 
 extern "C"
 void raytrace(
   uint* pbo_out, const uint w, const uint h, const float time,
   const glm::vec3& campos, const glm::vec3& A, const glm::vec3& B, const glm::vec3& C,
   const Object::Object* scene_d, const uint sceneSize,
+  glm::vec3* rand_d,
+  uint* flags_d,
   Ray::Ray* rays_d,
   glm::vec3* col_d,
-  glm::vec3* film_d, const uint filmAccumNum)
+  glm::vec3* film_d, const uint filmIters)
 {
-  dim3 block(8,8);
+  curandGenerator_t gen;
+  curandCreateGenerator(&gen, CURAND_RNG_PSEUDO_DEFAULT);
+  curandSetPseudoRandomGeneratorSeed(gen, time*10.0f);
+  curandGenerateUniform(gen, (float*)rand_d, 3*w*h);
+
+  dim3 block(BLOCK_SIZE,BLOCK_SIZE);
 	dim3 grid(w/block.x,h/block.y);
-  initBuffers<<<grid, block>>>(w,h,campos,A,B,C,rays_d,col_d,film_d,filmAccumNum);
+  initBuffers<<<grid, block>>>(w,h,campos,A,B,C,rays_d,col_d,flags_d,film_d,filmIters);
   for (int i=0; i<PATH_DEPTH; ++i)
-    calcColorKernel<<<grid, block>>>(w,h,time,scene_d,sceneSize,rays_d,col_d);
-  accumColorKernel<<<grid, block>>>(w,h,pbo_out,col_d,film_d,filmAccumNum);
+    calcColorKernel<<<grid, block>>>(w,h,time,scene_d,sceneSize,rand_d,flags_d,rays_d,col_d,i);
+  accumColorKernel<<<grid, block>>>(w,h,pbo_out,col_d,film_d,filmIters);
 }

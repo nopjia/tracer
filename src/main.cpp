@@ -24,8 +24,10 @@ namespace {
   Ray::Ray* rays_d;
   glm::vec3* col_d;
   glm::vec3* film_d;
-  uint filmAccumNum = 1;
+  uint filmIters = 0;
   bool moved = false;
+  glm::vec3* rand_d;
+  uint* flags_d;
 }
 
 // global methods
@@ -47,9 +49,11 @@ void raytrace(
   uint* pbo_out, const uint w, const uint h, const float time,
   const glm::vec3& campos, const glm::vec3& A, const glm::vec3& B, const glm::vec3& C,
   const Object::Object* scene_d, const uint sceneSize,
+  glm::vec3* rand_d,
+  uint* flags_d,
   Ray::Ray* rays_d,
   glm::vec3* col_d,
-  glm::vec3* film_d, const uint filmAccumNum);
+  glm::vec3* film_d, const uint filmIters);
 
 void mytest() {
   Ray::Ray ray;
@@ -149,7 +153,7 @@ void getFPS() {
     frameCount = 0;
 
     char buffer[32];
-    sprintf(buffer, "%.4f : %.0f", fps, milisecs);
+    sprintf(buffer, "%.4f : %.0f : %u", fps, milisecs, filmIters);
     glutSetWindowTitle(buffer);
   }
 
@@ -293,11 +297,11 @@ void raytrace() {
 
   // film  
   if (moved) {
-    filmAccumNum = 1;
+    filmIters = 1;
     moved = false;
   }
   else {
-    ++filmAccumNum;
+    ++filmIters;
   }
 
   // cuda call
@@ -307,8 +311,8 @@ void raytrace() {
   raytrace(out_data, image_width, image_height, timer,
     camera.getPosition(),A,B,C,
     scene_d, scene.size(),
-    rays_d,col_d,
-    film_d, filmAccumNum);
+    rand_d, flags_d, rays_d, col_d,
+    film_d, filmIters);
 
 	checkCudaErrors(cudaGLUnmapBufferObject(pbo));
 
@@ -327,11 +331,13 @@ void loadScene() {
   Object::Object* obj;
 
   obj = Object::newObject(Mesh::loadObj("data/unitcube.obj"));
-  Object::rotate(*obj, glm::angleAxis(55.0f, glm::vec3(0.707106781186547524400844362104849039, 0.707106781186547524400844362104849039, 0.0f)));
-  Object::scale(*obj, glm::vec3(0.5f, 2.0f, 1.0f));
-  Object::translate(*obj, glm::vec3(4.0f, -2.0f, 1.0f));
+  //Object::rotate(*obj, glm::angleAxis(55.0f, glm::vec3(0.707106781186547524400844362104849039, 0.707106781186547524400844362104849039, 0.0f)));
+  //Object::scale(*obj, glm::vec3(0.5f, 2.0f, 1.0f));
+  //Object::translate(*obj, glm::vec3(4.0f, -2.0f, 1.0f));
+  Object::scale(*obj, glm::vec3(5.0f, 0.5f, 5.0f));
+  Object::translate(*obj, glm::vec3(0.0f, 5.0f, 0.0f));
   obj->m_material.m_color = glm::vec3(1.0f);
-  obj->m_material.m_emit = glm::vec3(1.0f);
+  obj->m_material.m_emit = 10.0f;
   scene.push_back(obj);
 
   obj = Object::newObject(Mesh::loadObj("data/unitcube_inv.obj"));
@@ -348,6 +354,8 @@ void initMemoryCUDA() {
   cudaMalloc(&rays_d, image_width*image_height*sizeof(Ray::Ray));
   cudaMalloc(&col_d, image_width*image_height*sizeof(glm::vec3));
   cudaMalloc(&film_d, image_width*image_height*sizeof(glm::vec3));
+  cudaMalloc(&rand_d, image_width*image_height*sizeof(glm::vec3));
+  cudaMalloc(&flags_d, image_width*image_height*sizeof(uint));
 }
 
 void loadSceneCUDA() {

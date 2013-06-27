@@ -12,9 +12,9 @@ namespace Utils {
   }
 
   // http://stackoverflow.com/questions/5408276/python-uniform-spherical-distribution
-  HOST DEVICE extern inline glm::vec3 randVector(glm::vec3 seed) {
-    float phi = rand(seed)*2.0f*M_PI;
-    float theta = glm::acos( rand(seed)*2.0f-1.0f );
+  HOST DEVICE extern inline glm::vec3 randVector(float rand1, float rand2) {
+    float phi = rand1*2.0f*M_PI;
+    float theta = glm::acos( rand2*2.0f-1.0f );
     return glm::vec3 (
       glm::sin(theta)*glm::cos(phi),
       glm::sin(theta)*glm::sin(phi),
@@ -22,8 +22,8 @@ namespace Utils {
     );
   }
 
-  HOST DEVICE extern inline glm::vec3 randVectorHem(glm::vec3 seed, glm::vec3 nor) {
-    glm::vec3 v = randVector(seed);
+  HOST DEVICE extern inline glm::vec3 randVectorHem(float rand1, float rand2, glm::vec3 nor) {
+    glm::vec3 v = randVector(rand1, rand2);
     if (glm::dot(v,nor) < 0)
       v = -v;
     return v;

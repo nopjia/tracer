@@ -22,14 +22,16 @@ typedef unsigned int uint;
 
 #define EPS   0.001f
 
-#define WINDOW_W    640
-#define WINDOW_H    480
+#define WINDOW_W    512
+#define WINDOW_H    384
 #define PIXSCALE    2
 #define DELTA_T     0.1f
 #define BLOCK_SIZE  32
 
 // rendering constants
-#define PATH_DEPTH  2
+#define PATH_DEPTH  3
+
+#define THFL_PATH_RUN   0x0001
 
 // options
 #define TRI_NORM_INTERP
