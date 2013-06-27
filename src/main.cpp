@@ -330,18 +330,43 @@ void raytrace() {
 void loadScene() {
   Object::Object* obj;
 
-  obj = Object::newObject(Mesh::loadObj("data/unitcube.obj"));
-  //Object::rotate(*obj, glm::angleAxis(55.0f, glm::vec3(0.707106781186547524400844362104849039, 0.707106781186547524400844362104849039, 0.0f)));
-  //Object::scale(*obj, glm::vec3(0.5f, 2.0f, 1.0f));
-  //Object::translate(*obj, glm::vec3(4.0f, -2.0f, 1.0f));
-  Object::scale(*obj, glm::vec3(5.0f, 0.5f, 5.0f));
+  Mesh::Mesh* planemesh = Mesh::loadObj("data/unitplane.obj");
+
+  obj = Object::newObject(planemesh);
+  Object::scale(*obj, 10.0f);
+  Object::translate(*obj, glm::vec3(0.0f, -5.0f, 0.0f));
+  obj->m_material.m_color = glm::vec3(1.0f);
+  scene.push_back(obj);
+  obj = Object::newObject(planemesh);
+  Object::scale(*obj, 10.0f);
+  Object::rotate(*obj, glm::angleAxis(180.0f, glm::vec3(1.0f, 0.0f, 0.0f)));
   Object::translate(*obj, glm::vec3(0.0f, 5.0f, 0.0f));
   obj->m_material.m_color = glm::vec3(1.0f);
-  obj->m_material.m_emit = 10.0f;
+  obj->m_material.m_emit = 2.0f;
   scene.push_back(obj);
-
-  obj = Object::newObject(Mesh::loadObj("data/unitcube_inv.obj"));
+  obj = Object::newObject(planemesh);
   Object::scale(*obj, 10.0f);
+  Object::rotate(*obj, glm::angleAxis(90.0f, glm::vec3(1.0f, 0.0f, 0.0f)));
+  Object::translate(*obj, glm::vec3(0.0f, 0.0f, -5.0f));
+  obj->m_material.m_color = glm::vec3(1.0f);
+  scene.push_back(obj);
+  obj = Object::newObject(planemesh);
+  Object::scale(*obj, 10.0f);
+  Object::rotate(*obj, glm::angleAxis(-90.0f, glm::vec3(1.0f, 0.0f, 0.0f)));
+  Object::translate(*obj, glm::vec3(0.0f, 0.0f, 5.0f));
+  obj->m_material.m_color = glm::vec3(1.0f);
+  scene.push_back(obj);
+  obj = Object::newObject(planemesh);
+  Object::scale(*obj, 10.0f);
+  Object::rotate(*obj, glm::angleAxis(90.0f, glm::vec3(0.0f, 0.0f, 1.0f)));
+  Object::translate(*obj, glm::vec3(5.0f, 0.0f, 0.0f));
+  obj->m_material.m_color = glm::vec3(0.0f, 0.0f, 1.0f);
+  scene.push_back(obj);
+  obj = Object::newObject(planemesh);
+  Object::scale(*obj, 10.0f);
+  Object::rotate(*obj, glm::angleAxis(-90.0f, glm::vec3(0.0f, 0.0f, 1.0f)));
+  Object::translate(*obj, glm::vec3(-5.0f, 0.0f, 0.0f));
+  obj->m_material.m_color = glm::vec3(1.0f, 0.0f, 0.0f);
   scene.push_back(obj);
 
   obj = Object::newObject(Mesh::loadObj("data/icosahedron.obj"));  
