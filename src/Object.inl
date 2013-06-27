@@ -53,7 +53,7 @@ namespace Object {
 #define UPDATE_MAT_I() (obj.m_matrixi = glm::inverse(obj.m_matrix))
 
   void translate(Object& obj, const glm::vec3& amount) {
-    obj.m_matrix[3] += glm::vec4(amount, 1.0f);
+    obj.m_matrix[3] += glm::vec4(amount, 0.0f);
     UPDATE_MAT_I();
   }
 

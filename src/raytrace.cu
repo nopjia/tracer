@@ -111,7 +111,7 @@ __global__ void calcColorKernel(
         col[idx] = glm::vec3(0.0f);
       }
       else {
-        col[idx] *= scene[hit.m_id].m_material.m_color * scene[hit.m_id].m_material.m_brdf;
+        col[idx] *= scene[hit.m_id].m_material.m_color;// * scene[hit.m_id].m_material.m_brdf;
         rays[idx].m_dir = Utils::randVectorHem(rand[idx].x,rand[idx].y,hit.m_nor);
         rays[idx].m_pos = hit.m_pos + EPS*rays[idx].m_dir;
       }

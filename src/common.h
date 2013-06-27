@@ -23,14 +23,14 @@ typedef unsigned int uint;
 #define EPS   0.001f
 
 #define WINDOW_W    512
-#define WINDOW_H    384
+#define WINDOW_H    512
 #define PIXSCALE    2
 #define DELTA_T     0.1f
 #define BLOCK_SIZE  32
 
 // rendering constants
-#define FOV 45
-#define PATH_DEPTH  16
+#define FOV 30
+#define PATH_DEPTH  8
 
 #define THFL_PATH_RUN   0x0001
 
