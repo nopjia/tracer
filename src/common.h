@@ -32,8 +32,8 @@ typedef unsigned int uint;
 #define TRI_NORM_INTERP
 
 // render modes
-#define MODE_TEST   1
-#define MODE_TRACE  2
+#define MODE_RAYTRACE1  1
+#define MODE_PATHTRACE  2
 
 // rendering constants
 #define THFL_PATH_RUN   0x0001

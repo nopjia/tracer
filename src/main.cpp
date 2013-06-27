@@ -13,7 +13,7 @@ namespace {
   int mouseButtons = 0;   // 0x1 left, 0x2 middle, 0x4 right
   float timer = 0.0f;
   uint frameCount = 0, timeBase = 0;
-  uint mode = MODE_TEST;
+  uint mode = MODE_RAYTRACE1;
 
   GLuint pbo;               // pbo for CUDA and openGL
   GLuint result_texture;    // render result copied to this openGL texture
@@ -46,7 +46,7 @@ void mouse(int button, int state, int x, int y);
 void motion(int x, int y);
 
 extern "C"
-void raytrace(
+void pathtrace(
   uint* pbo_out, const uint w, const uint h, const float time,
   const glm::vec3& campos, const glm::vec3& A, const glm::vec3& B, const glm::vec3& C,
   const Object::Object* scene_d, const uint sceneSize,
@@ -57,7 +57,7 @@ void raytrace(
   glm::vec3* film_d, const uint filmIters);
 
 extern "C"
-void testtrace(
+void raytrace1(
   uint* pbo_out, const uint w, const uint h, const float time,
   const glm::vec3& campos, const glm::vec3& A, const glm::vec3& B, const glm::vec3& C,
   const Object::Object* scene_d, const uint sceneSize);
@@ -186,8 +186,8 @@ void draw() {
 void keyboard(unsigned char key, int x, int y) {
   switch(key) {
     case(27) : exit(0); break;
-    case('1') : mode = MODE_TEST; break;
-    case('2') : mode = MODE_TRACE; break;
+    case('1') : mode = MODE_RAYTRACE1; break;
+    case('2') : mode = MODE_PATHTRACE; break;
   }
 }
 
@@ -311,12 +311,12 @@ void raytrace() {
   unsigned int* out_data;
 	checkCudaErrors(cudaGLMapBufferObject((void**)&out_data, pbo));
   
-  if (mode == MODE_TEST) {
-    testtrace(out_data, image_width, image_height, timer,
+  if (mode == MODE_RAYTRACE1) {
+    raytrace1(out_data, image_width, image_height, timer,
       camera.getPosition(), A, B, C,
       scene_d, scene.size());
   }
-  else if (mode == MODE_TRACE) {
+  else if (mode == MODE_PATHTRACE) {
     // film  
     if (moved) {
       filmIters = 1;
@@ -326,7 +326,7 @@ void raytrace() {
       ++filmIters;
     }
 
-    raytrace(out_data, image_width, image_height, timer,
+    pathtrace(out_data, image_width, image_height, timer,
       camera.getPosition(), A, B, C,
       scene_d, scene.size(),
       rand_d, flags_d, rays_d, col_d,

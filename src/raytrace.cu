@@ -142,7 +142,7 @@ __global__ void accumColorKernel(
 }
 
 extern "C"
-void raytrace(
+void pathtrace(
   uint* pbo_out, const uint w, const uint h, const float time,
   const glm::vec3& campos, const glm::vec3& A, const glm::vec3& B, const glm::vec3& C,
   const Object::Object* scene_d, const uint sceneSize,
@@ -171,7 +171,7 @@ void raytrace(
 }
 
 extern "C"
-void testtrace(
+void raytrace1(
   uint* pbo_out, const uint w, const uint h, const float time,
   const glm::vec3& campos, const glm::vec3& A, const glm::vec3& B, const glm::vec3& C,
   const Object::Object* scene_d, const uint sceneSize)
