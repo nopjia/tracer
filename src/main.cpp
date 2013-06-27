@@ -353,60 +353,68 @@ void loadScene() {
 
   Mesh::Mesh* planemesh = Mesh::loadObj("data/unitplane.obj");
 
-  //obj = Object::newObject(planemesh);
-  //Object::scale(*obj, BOX_HDIM*2.0f);
-  //Object::translate(*obj, glm::vec3(0.0f, -BOX_HDIM.y, 0.0f));
+  obj = Object::newObject(planemesh);
+  Object::scale(*obj, BOX_HDIM*2.0f);
+  Object::translate(*obj, glm::vec3(0.0f, -BOX_HDIM.y, 0.0f));
+  obj->m_material.m_color = glm::vec3(1.0f);
+  scene.push_back(obj);
+  obj = Object::newObject(planemesh);
+  Object::rotate(*obj, glm::angleAxis(180.0f, glm::vec3(1.0f, 0.0f, 0.0f)));
+  Object::scale(*obj, BOX_HDIM*2.0f);
+  Object::translate(*obj, glm::vec3(0.0f, BOX_HDIM.y, 0.0f));
+  obj->m_material.m_color = glm::vec3(1.0f);
+  obj->m_material.m_emit = 5.0f;
+  scene.push_back(obj);
+  obj = Object::newObject(planemesh);
+  Object::rotate(*obj, glm::angleAxis(90.0f, glm::vec3(1.0f, 0.0f, 0.0f)));
+  Object::scale(*obj, BOX_HDIM*2.0f);
+  Object::translate(*obj, glm::vec3(0.0f, 0.0f, -BOX_HDIM.z));
+  obj->m_material.m_color = glm::vec3(1.0f);
+  scene.push_back(obj);
+  obj = Object::newObject(planemesh);
+  Object::rotate(*obj, glm::angleAxis(-90.0f, glm::vec3(1.0f, 0.0f, 0.0f)));
+  Object::scale(*obj, BOX_HDIM*2.0f);
+  Object::translate(*obj, glm::vec3(0.0f, 0.0f, BOX_HDIM.z));
+  obj->m_material.m_color = glm::vec3(1.0f);
+  scene.push_back(obj);
+  obj = Object::newObject(planemesh);
+  Object::rotate(*obj, glm::angleAxis(90.0f, glm::vec3(0.0f, 0.0f, 1.0f)));
+  Object::scale(*obj, BOX_HDIM*2.0f);
+  Object::translate(*obj, glm::vec3(BOX_HDIM.x, 0.0f, 0.0f));
+  obj->m_material.m_color = glm::vec3(0.0f, 0.0f, 1.0f);
+  scene.push_back(obj);
+  obj = Object::newObject(planemesh);
+  Object::rotate(*obj, glm::angleAxis(-90.0f, glm::vec3(0.0f, 0.0f, 1.0f)));
+  Object::scale(*obj, BOX_HDIM*2.0f);
+  Object::translate(*obj, glm::vec3(-BOX_HDIM.x, 0.0f, 0.0f));
+  obj->m_material.m_color = glm::vec3(1.0f, 0.0f, 0.0f);
+  scene.push_back(obj);
+
+  //obj = Object::newObject(Mesh::loadObj("data/unitcube_inv.obj"));
+  //Object::scale(*obj, BOX_HDIM);
   //obj->m_material.m_color = glm::vec3(1.0f);
+  ////obj->m_material.m_emit = 1.0f;
   //scene.push_back(obj);
-  //obj = Object::newObject(planemesh);
-  //Object::rotate(*obj, glm::angleAxis(180.0f, glm::vec3(1.0f, 0.0f, 0.0f)));
-  //Object::scale(*obj, BOX_HDIM*2.0f);
-  //Object::translate(*obj, glm::vec3(0.0f, BOX_HDIM.y, 0.0f));
-  //obj->m_material.m_color = glm::vec3(1.0f);
-  //obj->m_material.m_emit = 5.0f;
+
+  //obj = Object::newObject(Mesh::loadObj("data/unitcube.obj"));
+  //Object::scale(*obj, 1.0f);
+  //Object::translate(*obj, glm::vec3(2.0f, 1.0f, 1.0f));
+  //obj->m_material.m_color = glm::vec3(1.0f, 1.0f, 1.0f);
+  //obj->m_material.m_emit = 10.0f;
   //scene.push_back(obj);
-  //obj = Object::newObject(planemesh);
-  //Object::rotate(*obj, glm::angleAxis(90.0f, glm::vec3(1.0f, 0.0f, 0.0f)));
-  //Object::scale(*obj, BOX_HDIM*2.0f);
-  //Object::translate(*obj, glm::vec3(0.0f, 0.0f, -BOX_HDIM.z));
-  //obj->m_material.m_color = glm::vec3(1.0f);
+
+  //obj = Object::newObject(Mesh::loadObj("data/icosahedron.obj"));  
+  //Object::translate(*obj, glm::vec3(0.0f, -3.0f, 0.0f));
+  //obj->m_material.m_color = glm::vec3(1.0, 1.0, 0.0);
   //scene.push_back(obj);
-  //obj = Object::newObject(planemesh);
-  //Object::rotate(*obj, glm::angleAxis(-90.0f, glm::vec3(1.0f, 0.0f, 0.0f)));
-  //Object::scale(*obj, BOX_HDIM*2.0f);
-  //Object::translate(*obj, glm::vec3(0.0f, 0.0f, BOX_HDIM.z));
-  //obj->m_material.m_color = glm::vec3(1.0f);
+  
+  //obj = Object::newObject(Mesh::loadObj("data/unitcube.obj"));
   //scene.push_back(obj);
-  //obj = Object::newObject(planemesh);
-  //Object::rotate(*obj, glm::angleAxis(90.0f, glm::vec3(0.0f, 0.0f, 1.0f)));
-  //Object::scale(*obj, BOX_HDIM*2.0f);
-  //Object::translate(*obj, glm::vec3(BOX_HDIM.x, 0.0f, 0.0f));
-  //obj->m_material.m_color = glm::vec3(0.0f, 0.0f, 1.0f);
-  //scene.push_back(obj);
-  //obj = Object::newObject(planemesh);
-  //Object::rotate(*obj, glm::angleAxis(-90.0f, glm::vec3(0.0f, 0.0f, 1.0f)));
-  //Object::scale(*obj, BOX_HDIM*2.0f);
-  //Object::translate(*obj, glm::vec3(-BOX_HDIM.x, 0.0f, 0.0f));
+
+  //obj = Object::newObject(Mesh::loadObj("data/unitcube.obj"));
+  //Object::translate(*obj, glm::vec3(1.0f, 0.0f, 0.0f));
   //obj->m_material.m_color = glm::vec3(1.0f, 0.0f, 0.0f);
   //scene.push_back(obj);
-
-  obj = Object::newObject(Mesh::loadObj("data/unitcube_inv.obj"));
-  Object::scale(*obj, BOX_HDIM);
-  obj->m_material.m_color = glm::vec3(1.0f);
-  //obj->m_material.m_emit = 1.0f;
-  scene.push_back(obj);
-
-  obj = Object::newObject(Mesh::loadObj("data/unitcube.obj"));
-  Object::scale(*obj, 1.0f);
-  Object::translate(*obj, glm::vec3(2.0f, 1.0f, 1.0f));
-  obj->m_material.m_color = glm::vec3(1.0f, 1.0f, 1.0f);
-  obj->m_material.m_emit = 10.0f;
-  scene.push_back(obj);
-
-  obj = Object::newObject(Mesh::loadObj("data/icosahedron.obj"));  
-  Object::translate(*obj, glm::vec3(0.0f, -3.0f, 0.0f));
-  obj->m_material.m_color = glm::vec3(1.0, 1.0, 0.0);
-  scene.push_back(obj);
 }
 
 void initMemoryCUDA() {

@@ -42,6 +42,7 @@ __global__ void testKernel(
 
   glm::vec3 lightDir(0.267261, 0.801784, 0.534522);
   Ray::Hit hit = Ray::intersectScene(ray, scene, sceneSize);
+  //Ray::Hit hit = Ray::intersect(ray, *scene[0].m_mesh);
 
   glm::vec3 col;
   if (hit.m_id < 0) {
@@ -64,13 +65,13 @@ __global__ void initBuffersKernel(
   uint x = blockIdx.x*blockDim.x + threadIdx.x;
   uint y = blockIdx.y*blockDim.y + threadIdx.y;
   uint idx = y*w + x;
-
+  
   // calc camera rays
-  glm::vec2 uv((float)x/w, (float)y/h);  
+  glm::vec2 uv((float)x/w, (float)y/h);
   rays[idx].m_pos = campos+C + (2.0f*uv.x-1.0f)*A + (2.0f*uv.y-1.0f)*B;
   rays[idx].m_dir = glm::normalize(rays[idx].m_pos-campos);
 
-  // reset color buffer
+  // reset buffers
   col[idx] = glm::vec3(1.0f);
 
   if (filmIters==1)

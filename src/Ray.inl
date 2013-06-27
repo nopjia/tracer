@@ -101,33 +101,17 @@ namespace Ray {
     return hit;
   }
 
-  Hit intersect(const Ray& ray, const Mesh::Mesh& mesh) {
-    float tmin = FLT_MIN;
-    float tmax = FLT_MAX;
-    for (int i=0; i<3; ++i) {
-      if (glm::abs(ray.m_dir[i]) < EPS) {
-        // ray parallel to slab
-        if (ray.m_pos[i] < mesh.m_bmin[i] || ray.m_pos[i] > mesh.m_bmax[i]) {
-          return Hit();
-        }
-      }
-      else {
-        // compute intersect t with near and far plane
-        float t1 = (mesh.m_bmin[i] - ray.m_pos[i]) / ray.m_dir[i];
-        float t2 = (mesh.m_bmax[i] - ray.m_pos[i]) / ray.m_dir[i];
-        // make t1 intersection with near plane, swap
-        if (t1 > t2) { float temp = t1; t1 = t2; t2 = temp; }
-        // compute intersect slab intervals
-        if (t1 > tmin) tmin = t1;
-        if (t2 < tmax) tmax = t2;
-        // exit with no collision, empty slab intersection
-        if (tmin > tmax || tmax < 0.0f) return Hit();
-      }
-    }
-    // ray intersects all 3 slabs, return
-    Hit hit;
+  Hit intersect(const Ray& ray, const Mesh::Mesh& mesh) {    
+    glm::vec3 tMin = (mesh.m_bmin-ray.m_pos) / ray.m_dir;
+    glm::vec3 tMax = (mesh.m_bmax-ray.m_pos) / ray.m_dir;
+    glm::vec3 t1 = glm::min(tMin, tMax);
+    glm::vec3 t2 = glm::max(tMin, tMax);
+    float tNear = glm::max(glm::max(t1.x, t1.y), t1.z);
+    float tFar = glm::min(glm::min(t2.x, t2.y), t2.z);    
+    if (tNear > tFar || tFar < 0.0f) return Hit();
     
     // loop triangles and return intersection
+    Hit hit;
     hit.m_t = FLT_MAX;
     for (int i=0; i<mesh.m_numFaces; ++i) {      
       Hit thit = intersect(ray, Mesh::getTriangle(mesh,i));
