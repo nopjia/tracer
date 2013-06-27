@@ -14,9 +14,8 @@ typedef unsigned int uint;
 #define DELTA_T     0.1f
 #define BLOCK_SIZE  32
 
-// lighting constants
-#define KD 1.0
-#define KA 0.0
+// rendering constants
+#define PATH_DEPTH  8
 
 // options
 #define TRI_NORM_INTERP

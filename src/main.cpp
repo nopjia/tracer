@@ -22,12 +22,14 @@ namespace {
 
   std::vector<Object::Object*> scene;
   Object::Object* scene_d;  // pointer to device
+  Ray::Ray* rays_d;
 }
 
 // global methods
 void initGL();
 void initCUDA (int argc, char **argv);
 void initPBO();
+void initMemoryCUDA();
 void loadScene();
 void loadSceneCUDA();
 void raytrace();
@@ -37,9 +39,9 @@ void keyboard(unsigned char key, int x, int y);
 void mouse(int button, int state, int x, int y);
 void motion(int x, int y);
 
-extern "C" 
+extern "C"
 void raytrace(
-  uint *pbo_out, 
+  uint* pbo_out, Ray::Ray* rays_d,
   const uint w, const uint h,
   const glm::vec3& campos, const glm::vec3& A, const glm::vec3& B, const glm::vec3& C,
   const Object::Object* scene, const uint sceneSize,
@@ -99,6 +101,7 @@ int main(int argc, char **argv) {
   initGL();
   initCUDA(argc, argv);
   initPBO();
+  initMemoryCUDA();
   loadScene();
   loadSceneCUDA();
 
@@ -117,21 +120,7 @@ void initGL() {
 
   glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
 
-  // back face culling
-  //glEnable(GL_CULL_FACE);
-  //glCullFace(GL_BACK);
-  //glFrontFace(GL_CCW);
-
-  // depth testing
   glDisable(GL_DEPTH_TEST);
-  //glEnable(GL_DEPTH_TEST);
-  //glDepthMask(GL_TRUE);
-  //glDepthFunc(GL_LEQUAL);
-  //glDepthRange(0.0f, 1.0f);  
-  //glClearDepth(1.0f);
-
-  //glEnable(GL_TEXTURE_2D);
-  //glDisable(GL_LIGHTING);
   
   fullScreenQuad.begin();
   camera.setAspectRatio(WINDOW_W, WINDOW_H);
@@ -230,7 +219,6 @@ void initCUDA (int argc, char **argv) {
 }
 
 void initPBO() {
-
   // initialize the PBO for transferring data from CUDA to openGL
   uint num_texels = image_width * image_height;
   uint size_tex_data = sizeof(GLubyte) * num_texels * 4;
@@ -300,7 +288,8 @@ void raytrace() {
   unsigned int* out_data;
 	checkCudaErrors(cudaGLMapBufferObject((void**)&out_data, pbo));
   
-  raytrace(out_data, image_width, image_height,
+  raytrace(out_data, rays_d,
+    image_width, image_height,
     camera.getPosition(),A,B,C,
     scene_d, scene.size(),
     timer);
@@ -325,7 +314,8 @@ void loadScene() {
   Object::rotate(*obj, glm::angleAxis(55.0f, glm::vec3(0.707106781186547524400844362104849039, 0.707106781186547524400844362104849039, 0.0f)));
   Object::scale(*obj, glm::vec3(0.5f, 2.0f, 1.0f));
   Object::translate(*obj, glm::vec3(4.0f, -2.0f, 1.0f));
-  obj->m_material.m_color = glm::vec3(0.5, 0.0, 0.8);
+  obj->m_material.m_color = glm::vec3(1.0f);
+  obj->m_material.m_emissivity = 1.0f;
   scene.push_back(obj);
 
   obj = Object::newObject(Mesh::loadObj("data/unitcube_inv.obj"));
@@ -338,7 +328,12 @@ void loadScene() {
   scene.push_back(obj);
 }
 
-void loadSceneCUDA() {  
+void initMemoryCUDA() {
+  size_t raysMemSize = image_width*image_height*sizeof(Ray::Ray);
+  cudaMalloc(&rays_d, raysMemSize);
+}
+
+void loadSceneCUDA() {
   size_t meshMemSize = sizeof(Mesh::Mesh);
   size_t objectMemSize = sizeof(Object::Object);
 

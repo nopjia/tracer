@@ -31,3 +31,11 @@ Intersection - result of intersection test
 
 Film - image buffer
   HDR buffer
+
+
+
+for each bounce:
+  unaccumulated color = unaccumulated color * BRDF * color
+  accumulated color = accumulated color + unaccumulated color * emittance
+
+radiance = emittance + (BRDF * mat_color * incident light)

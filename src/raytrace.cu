@@ -22,43 +22,51 @@ __device__ int rgbToInt(glm::vec3 c)
   return (int(c.r*255.0)<<16) | (int(c.g*255.0)<<8) | int(c.b*255.0);
 }
 
-__global__ void raytraceKernel(
-  uint *pbo_out, 
+__global__ void calcInitRaysKernel(
+  Ray::Ray* rays,
   const uint w, const uint h,
-  const glm::vec3 campos, const glm::vec3 A, const glm::vec3 B, const glm::vec3 C,
-  const Object::Object* scene, const uint sceneSize,
-  const float time)
+  const glm::vec3 campos, const glm::vec3 A, const glm::vec3 B, const glm::vec3 C
+  )
+{
+  uint x = blockIdx.x*blockDim.x + threadIdx.x;
+  uint y = blockIdx.y*blockDim.y + threadIdx.y;
+  uint idx = y*w + x;
+
+  glm::vec2 uv((float)x/w, (float)y/h);  
+
+  rays[idx].m_pos = campos+C + (2.0f*uv.x-1.0f)*A + (2.0f*uv.y-1.0f)*B;
+  rays[idx].m_dir = glm::normalize(rays[idx].m_pos-campos);
+}
+
+__global__ void calcColorKernel(
+  uint *pbo_out, const uint w, const uint h,
+  const Ray::Ray* rays,
+  const Object::Object* scene, const uint sceneSize)
 { 
   uint x = blockIdx.x*blockDim.x + threadIdx.x;
   uint y = blockIdx.y*blockDim.y + threadIdx.y;
+  uint idx = y*w + x;
 
-  glm::vec2 uv((float)x/w, (float)y/h);
-  
-  Ray::Ray ray = {
-    campos+C + (2.0f*uv.x-1.0f)*A + (2.0f*uv.y-1.0f)*B,
-    glm::normalize(ray.m_pos-campos)
-  };
+  glm::vec3 lightDir(-0.534522, 0.801784, 0.267261);
 
-  glm::vec3 lightDir( 0.57735, 0.57735, 0.57735 );
-
-  Ray::Hit hit = Ray::intersectScene(ray, scene, sceneSize);
+  Ray::Hit hit = Ray::intersectScene(rays[idx], scene, sceneSize);
 
   glm::vec3 outcolor;
   
   if (hit.m_id < 0) {
-    outcolor = ray.m_dir;
+    outcolor = rays[idx].m_dir;
   }
   else {
     outcolor = scene[hit.m_id].m_material.m_color;
-    outcolor *= KA + KD*glm::max(glm::dot(lightDir,hit.m_nor),0.0f);
+    outcolor *= glm::max(glm::dot(lightDir,hit.m_nor),0.0f);
   }
 
-  pbo_out[y*w + x] = rgbToInt(outcolor);
+  pbo_out[idx] = rgbToInt(outcolor);
 }
 
-extern "C" 
+extern "C"
 void raytrace(
-  uint *pbo_out, 
+  uint* pbo_out, Ray::Ray* rays_d,
   const uint w, const uint h,
   const glm::vec3& campos, const glm::vec3& A, const glm::vec3& B, const glm::vec3& C,
   const Object::Object* scene, const uint sceneSize,
@@ -66,9 +74,9 @@ void raytrace(
 {
   dim3 block(8,8);
 	dim3 grid(w/block.x,h/block.y);
-	raytraceKernel<<<grid, block>>>(
-    pbo_out,w,h,
-    campos,A,B,C,
-    scene,sceneSize,
-    time);
+  calcInitRaysKernel<<<grid, block>>>(rays_d,w,h,campos,A,B,C);
+
+  //for (int i=0; i<PATH_DEPTH; ++i) {
+    calcColorKernel<<<grid, block>>>(pbo_out,w,h,rays_d,scene,sceneSize);
+  //}
 }

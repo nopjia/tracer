@@ -4,20 +4,23 @@ cutilExit
 bind / map texture
 load triangles
 fix xyz directions
-
------
-
-bug: obj loader need endline at end of .obj file
-
-optimize intersections
-use tmin for intersection comparison
-
 get FPS
-
 load obj normals
 per vertex normals
 barycentric interp
 
+-----
+
+path trace
+film memory
+
+optimize intersections
+use tmin for intersection comparison
+
 wave-front kernels
 
 kd-tree: obj tree, scene tree
+
+-----
+
+bug: obj loader need endline at end of .obj file
