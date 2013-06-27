@@ -28,18 +28,17 @@ typedef unsigned int uint;
 #define DELTA_T     0.1f
 #define BLOCK_SIZE  32
 
-// rendering constants
-#define FOV 30
-#define PATH_DEPTH  2
-
-#define THFL_PATH_RUN   0x0001
-
 // options
 #define TRI_NORM_INTERP
 
 // render modes
 #define MODE_TEST   1
 #define MODE_TRACE  2
+
+// rendering constants
+#define THFL_PATH_RUN   0x0001
+#define FOV 30
+#define PATH_DEPTH 2
 
 
 

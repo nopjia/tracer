@@ -69,8 +69,8 @@ __global__ void initBuffersKernel(
   
   // calc camera rays
   glm::vec2 uv(
-    (float)x/w + (2.0f*rand[idx].x+1.0f)/w, 
-    (float)y/h + (2.0f*rand[idx].y+1.0f)/h
+    (float)x/w + (2.0f*rand[idx].x-1.0f)/w, 
+    (float)y/h + (2.0f*rand[idx].y-1.0f)/h
   );
   rays[idx].m_pos = campos+C + (2.0f*uv.x-1.0f)*A + (2.0f*uv.y-1.0f)*B;
   rays[idx].m_dir = glm::normalize(rays[idx].m_pos-campos);
@@ -102,24 +102,28 @@ __global__ void calcColorKernel(
 
   Ray::Hit hit = Ray::intersectScene(rays[idx], scene, sceneSize);
   
-  if (hit.m_id < 0) {
+  // intersects nothing, kill path
+  if( hit.m_id < 0 ) {
     col[idx] = glm::vec3(0.0f);
+    flags[idx] &= !THFL_PATH_RUN;
+    return;
   }
-  else {
-    if (scene[hit.m_id].m_material.m_emit > 0.0f) {
-      col[idx] *= scene[hit.m_id].m_material.m_color* scene[hit.m_id].m_material.m_emit;
-      flags[idx] &= !THFL_PATH_RUN;
+  
+  // intersects light, kill path
+  if (scene[hit.m_id].m_material.m_emit > 0.0f) {
+    col[idx] *= scene[hit.m_id].m_material.m_color* scene[hit.m_id].m_material.m_emit;
+    flags[idx] &= !THFL_PATH_RUN;
+  }
+  else {    
+    // hit max path depth, does not contribute color
+    if (depth == PATH_DEPTH-1) {
+      col[idx] = glm::vec3(0.0f);
+      return;
     }
-    else {
-      if (depth == PATH_DEPTH-1) {
-        col[idx] = glm::vec3(0.0f);
-      }
-      else {
-        col[idx] *= scene[hit.m_id].m_material.m_color;// * scene[hit.m_id].m_material.m_brdf;
-        rays[idx].m_dir = Utils::randVectorHem(rand[idx].x,rand[idx].y,hit.m_nor);
-        rays[idx].m_pos = hit.m_pos + EPS*rays[idx].m_dir;
-      }
-    }    
+
+    col[idx] *= scene[hit.m_id].m_material.m_color;// * scene[hit.m_id].m_material.m_brdf;
+    rays[idx].m_dir = Utils::randVectorHem(rand[idx].x,rand[idx].y,hit.m_nor);
+    rays[idx].m_pos = hit.m_pos + EPS*rays[idx].m_dir;
   }
 }
 
