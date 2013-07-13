@@ -15,7 +15,7 @@
 
 namespace Material {
 
-  enum Type {DIFF, MIRR};
+  enum Type {DIFF, TRANS, MIRR};
 
   struct Material {
     HOST DEVICE Material() : 

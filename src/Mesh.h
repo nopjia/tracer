@@ -3,9 +3,9 @@
 
 namespace Mesh {
 
-  Mesh* newSphere() {
+  Mesh* newGeometry(const MeshType type) {
     Mesh* mesh = (Mesh*)malloc(sizeof(Mesh));
-    mesh->m_type = SPHERE;
+    mesh->m_type = type;
     return mesh;
   }
 

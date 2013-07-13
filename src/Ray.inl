@@ -119,6 +119,28 @@ namespace Ray {
       return hit;
     }
 
+    else if (mesh.m_type == Mesh::CUBE) {
+      glm::vec3 tMin = (glm::vec3(-0.5f)-ray.m_pos) / ray.m_dir;
+      glm::vec3 tMax = (glm::vec3(0.5f)-ray.m_pos) / ray.m_dir;
+      glm::vec3 t1 = glm::min(tMin, tMax);
+      glm::vec3 t2 = glm::max(tMin, tMax);
+      float tNear = glm::max(glm::max(t1.x, t1.y), t1.z);
+      float tFar = glm::min(glm::min(t2.x, t2.y), t2.z);    
+      if (tNear > tFar || tFar < 0.0f) return Hit();
+      
+      Hit hit;
+      hit.m_t = tNear > 0.0f ? tNear : tFar;
+      hit.m_pos = ray.m_pos + ray.m_dir*hit.m_t;
+      if 			(hit.m_pos.x < -0.5f+EPS) hit.m_nor = glm::vec3(-1.0f,  0.0f,  0.0f);
+      else if (hit.m_pos.x >  0.5f-EPS) hit.m_nor = glm::vec3( 1.0f,  0.0f,  0.0f);
+      else if (hit.m_pos.y < -0.5f+EPS) hit.m_nor = glm::vec3( 0.0f, -1.0f,  0.0f);
+      else if (hit.m_pos.y >  0.5f-EPS) hit.m_nor = glm::vec3( 0.0f,  1.0f,  0.0f);
+      else if (hit.m_pos.z < -0.5f+EPS) hit.m_nor = glm::vec3( 0.0f,  0.0f, -1.0f);
+      else                              hit.m_nor = glm::vec3( 0.0f,  0.0f,  1.0f);
+      
+      return hit;
+    }
+
     else if (mesh.m_type == Mesh::MESH) {
       glm::vec3 tMin = (mesh.m_bmin-ray.m_pos) / ray.m_dir;
       glm::vec3 tMax = (mesh.m_bmax-ray.m_pos) / ray.m_dir;

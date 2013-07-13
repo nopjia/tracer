@@ -29,7 +29,7 @@ namespace Mesh {
     glm::vec3 m_n[3];
   };
 
-  enum MeshType {MESH, SPHERE};
+  enum MeshType {MESH, SPHERE, CUBE};
 
   struct Mesh {
     uint m_numVerts, m_numNorms, m_numFaces;

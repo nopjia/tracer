@@ -13,6 +13,7 @@ film memory
 FIX NOW : BUG : ray intersection, distortion
 do Karl's 2 buffers - DOES NOT WORK
 focal blur - BAD random not on disk
+spheres and cube
 
 -----
 
@@ -22,7 +23,7 @@ fresnel reflection / refraction
 
 exit / cleanup CUDA correctly?
 
-do spheres
+object picking / moving
 
 optimize intersections
 use tmin for intersection comparison
