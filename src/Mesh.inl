@@ -29,12 +29,15 @@ namespace Mesh {
     glm::vec3 m_n[3];
   };
 
+  enum MeshType {MESH, SPHERE};
+
   struct Mesh {
     uint m_numVerts, m_numNorms, m_numFaces;
     glm::vec3* m_verts;
     glm::vec3* m_norms;
     Face* m_faces;
     glm::vec3 m_bmin, m_bmax;
+    MeshType m_type;
   };
 
   // forward declarations

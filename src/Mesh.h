@@ -3,6 +3,12 @@
 
 namespace Mesh {
 
+  Mesh* newSphere() {
+    Mesh* mesh = (Mesh*)malloc(sizeof(Mesh));
+    mesh->m_type = SPHERE;
+    return mesh;
+  }
+
   Mesh* loadObj(const std::string filename) {
     std::ifstream in(filename.c_str());
 
@@ -68,6 +74,7 @@ namespace Mesh {
     // construct Mesh
 
     Mesh* mesh = (Mesh*)malloc(sizeof(Mesh));
+    mesh->m_type = MESH;
 
     size_t vertsMemSize = verts.size()*sizeof(glm::vec3);
     mesh->m_verts = (glm::vec3*)malloc(vertsMemSize);

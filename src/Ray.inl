@@ -69,7 +69,7 @@ namespace Ray {
 
     for (int i=0; i<size; ++i) {
       Hit h ( intersect(ray, scene[i]) );
-      if (h.m_id >= 0) {
+      if (h.m_t > 0.0f) {
         glm::vec3 subtract = ray.m_pos - h.m_pos;
         float dist = glm::dot(subtract,subtract);
         if (dist<mindist) {
@@ -90,7 +90,7 @@ namespace Ray {
     // intersection test
     Hit hit ( intersect(r, *obj.m_mesh) );
 
-    if (hit.m_id < 0) {
+    if (hit.m_t < 0.0f) {
       return Hit();
     }
     else {
@@ -101,33 +101,51 @@ namespace Ray {
     return hit;
   }
 
-  Hit intersect(const Ray& ray, const Mesh::Mesh& mesh) {    
-    glm::vec3 tMin = (mesh.m_bmin-ray.m_pos) / ray.m_dir;
-    glm::vec3 tMax = (mesh.m_bmax-ray.m_pos) / ray.m_dir;
-    glm::vec3 t1 = glm::min(tMin, tMax);
-    glm::vec3 t2 = glm::max(tMin, tMax);
-    float tNear = glm::max(glm::max(t1.x, t1.y), t1.z);
-    float tFar = glm::min(glm::min(t2.x, t2.y), t2.z);    
-    if (tNear > tFar || tFar < 0.0f) return Hit();
-    
-    // loop triangles and return intersection
-    Hit hit;
-    hit.m_t = FLT_MAX;
-    for (int i=0; i<mesh.m_numFaces; ++i) {      
-      Hit thit = intersect(ray, Mesh::getTriangle(mesh,i));
-      if (thit.m_t > 0.0f && thit.m_t < hit.m_t) {
-        hit = thit;
-        hit.m_id = i;
-      }
+  Hit intersect(const Ray& ray, const Mesh::Mesh& mesh) {
+    if (mesh.m_type == Mesh::SPHERE) {
+      glm::vec3 l = -ray.m_pos;
+      float s = glm::dot(l,ray.m_dir);
+      float l2 = glm::dot(l,l);
+      if (s < 0.0f && l2 > 0.25f) return Hit();
+      float m2 = l2 - s*s;
+      if (m2 > 0.25f) return Hit();
+      float q = glm::sqrt(0.25f-m2);
+      Hit hit;
+      if (l2 > 0.25f) hit.m_t = s - q;
+      else hit.m_t = s + q;
+
+      hit.m_pos = ray.m_pos + ray.m_dir*hit.m_t;
+      hit.m_nor = glm::normalize(hit.m_pos);
+      return hit;
     }
 
-    hit.m_pos = ray.m_pos + ray.m_dir*hit.m_t;
+    else if (mesh.m_type == Mesh::MESH) {
+      glm::vec3 tMin = (mesh.m_bmin-ray.m_pos) / ray.m_dir;
+      glm::vec3 tMax = (mesh.m_bmax-ray.m_pos) / ray.m_dir;
+      glm::vec3 t1 = glm::min(tMin, tMax);
+      glm::vec3 t2 = glm::max(tMin, tMax);
+      float tNear = glm::max(glm::max(t1.x, t1.y), t1.z);
+      float tFar = glm::min(glm::min(t2.x, t2.y), t2.z);    
+      if (tNear > tFar || tFar < 0.0f) return Hit();
+    
+      // loop triangles and return intersection
+      Hit hit;
+      hit.m_t = FLT_MAX;
+      for (int i=0; i<mesh.m_numFaces; ++i) {      
+        Hit thit = intersect(ray, Mesh::getTriangle(mesh,i));
+        if (thit.m_t > 0.0f && thit.m_t < hit.m_t) {
+          hit = thit;
+        }
+      }
 
-#ifndef TRI_NORM_INTERP
-    hit.m_nor = mesh.m_norms[mesh.m_faces[hit.m_id].m_n[0]];  // hack no interp
-#endif
+      hit.m_pos = ray.m_pos + ray.m_dir*hit.m_t;
 
-    return hit;
+      #ifndef TRI_NORM_INTERP
+      hit.m_nor = mesh.m_norms[mesh.m_faces[hit.m_id].m_n[0]];  // hack no interp
+      #endif
+
+      return hit;
+    }
   }
 
   Hit intersect(const Ray& ray, const Mesh::Triangle& tri) {

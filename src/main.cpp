@@ -426,12 +426,11 @@ void loadScene() {
   //obj->m_material.m_emit = 10.0f;
   //scene.push_back(obj);
 
-  obj = Object::newObject(Mesh::loadObj("data/unitcube.obj"));
-  Object::scale(*obj, 2.0f);
+  obj = Object::newObject(Mesh::newSphere());
+  Object::scale(*obj, 3.0f);
   Object::translate(*obj, glm::vec3(0.0f, -3.0f, 0.0f));
   obj->m_material.m_color = glm::vec3(1.0f, 1.0f, 0.5f);
   obj->m_material.m_type = Material::MIRR;
-  obj->m_material.m_n = 1.05f;
   scene.push_back(obj);
 }
 
