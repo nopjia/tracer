@@ -30,20 +30,21 @@ typedef unsigned int uint;
 
 #define EPS   0.01f
 
-#define WINDOW_W    512
-#define WINDOW_H    512
-#define PIXSCALE    2
-#define DELTA_T     0.1f
+#define WINDOW_W    256
+#define WINDOW_H    256
+#define PIXSCALE    1
+#define DELTA_T     0.01f
 #define BLOCK_SIZE  32
 
 // rendering constants
 #define THFL_NONE       0x0000
 #define THFL_PATH_RUN   0x0001
 #define FOV 30
-#define PATH_DEPTH 8
+#define PATH_DEPTH 4
 
 // options
 #define TRI_NORM_INTERP
+#define FOCAL_BLUR
 
 // render modes
 #define MODE_RAYTRACE1  1

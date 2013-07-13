@@ -22,6 +22,13 @@ namespace Utils {
     );
   }
 
+  HOST DEVICE extern inline glm::vec2 randPointDisk(float rand1, float rand2, float rand3) {
+    float t = 2.0f*M_PI*rand1;
+    float u = rand2 + rand3;
+    float r = u > 1.0f ? 2.0f-u : u;
+    return glm::vec2(r*glm::cos(t), r*glm::sin(t));
+  }
+
   HOST DEVICE extern inline glm::vec3 randVectorHem(float rand1, float rand2, glm::vec3 nor) {
     glm::vec3 v = randVector(rand1, rand2);
     if (glm::dot(v,nor) < 0)

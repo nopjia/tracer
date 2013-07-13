@@ -49,6 +49,7 @@ extern "C"
 void pathtrace(
   uint* pbo_out, const uint w, const uint h, const float time,
   const glm::vec3& campos, const glm::vec3& A, const glm::vec3& B, const glm::vec3& C,
+  const float lensRadius, const float focalDist,
   const Object::Object* scene_d, const uint sceneSize,
   glm::vec3* rand_d,
   uint* flags_d,
@@ -195,6 +196,16 @@ void keyboard(unsigned char key, int x, int y) {
     case(27) : exit(0); break;
     case('1') : mode = MODE_RAYTRACE1; break;
     case('2') : mode = MODE_PATHTRACE; break;
+    case('f') : 
+      camera.m_focalDist += 0.1; 
+      moved=true; 
+      break;
+    case('F') : 
+      if (camera.m_focalDist > 0.0) {
+        camera.m_focalDist -= 0.1;
+        moved=true;
+      }
+      break;
   }
 }
 
@@ -335,6 +346,7 @@ void raytrace() {
 
     pathtrace(out_data, image_width, image_height, timer,
       camera.getPosition(), A, B, C,
+      camera.m_lensRadius, camera.m_focalDist,
       scene_d, scene.size(),
       rand_d, flags_d, rays_d, col_d,
       film_d, filmIters);

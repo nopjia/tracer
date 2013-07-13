@@ -59,6 +59,7 @@ __global__ void testKernel(
 __global__ void initBuffersKernel(
   const uint w, const uint h,
   const glm::vec3 campos, const glm::vec3 A, const glm::vec3 B, const glm::vec3 C,
+  const float lensRadius, const float focalDist,
   glm::vec3* rand, uint* flags,
   Ray::Ray* rays, glm::vec3* col, 
   glm::vec3* film, uint filmIters)
@@ -74,6 +75,13 @@ __global__ void initBuffersKernel(
   );
   rays[idx].m_pos = campos+C + (2.0f*uv.x-1.0f)*A + (2.0f*uv.y-1.0f)*B;
   rays[idx].m_dir = glm::normalize(rays[idx].m_pos-campos);
+
+  // focal blur
+#ifdef FOCAL_BLUR
+  glm::vec3 fpt = focalDist*rays[idx].m_dir+rays[idx].m_pos;
+  rays[idx].m_pos += lensRadius*rand[idx];
+  rays[idx].m_dir = glm::normalize(fpt-rays[idx].m_pos);
+#endif
 
   // reset buffers
   col[idx] = glm::vec3(1.0f);
@@ -129,22 +137,7 @@ __global__ void calcColorKernel(
       rays[idx].m_dir = Utils::randVectorHem(rand[idx].x,rand[idx].y,hit.m_nor);
     }
     else if (scene[hit.m_id].m_material.m_type == Material::MIRR) {
-      float n1 = 1.0f;
-      float n2 = scene[hit.m_id].m_material.m_n;
-      glm::vec3 nor = hit.m_nor;
-      // if coming from inside
-      if (glm::dot(rays[idx].m_dir,hit.m_nor) > 0.0f) {
-        float temp = n1;
-        n1 = n2;
-        n2 = temp;
-        nor = -nor;
-      }
-        
-      float reflectance = Material::reflectance(hit.m_nor, rays[idx].m_dir, n1, n2);
-      if (rand[idx].x < reflectance)
-        rays[idx].m_dir = glm::reflect(rays[idx].m_dir, hit.m_nor);
-      else
-        rays[idx].m_dir = glm::refract(rays[idx].m_dir, nor, n1/n2);
+      rays[idx].m_dir = glm::reflect(rays[idx].m_dir, hit.m_nor);
     }
     rays[idx].m_pos = hit.m_pos + EPS*rays[idx].m_dir;
   }
@@ -169,6 +162,7 @@ extern "C"
 void pathtrace(
   uint* pbo_out, const uint w, const uint h, const float time,
   const glm::vec3& campos, const glm::vec3& A, const glm::vec3& B, const glm::vec3& C,
+  const float lensRadius, const float focalDist,
   const Object::Object* scene_d, const uint sceneSize,
   glm::vec3* rand_d,
   uint* flags_d,
@@ -178,14 +172,14 @@ void pathtrace(
 {
   curandGenerator_t gen;
   curandCreateGenerator(&gen, CURAND_RNG_PSEUDO_DEFAULT);
-  curandSetPseudoRandomGeneratorSeed(gen, time*10.0f);
+  curandSetPseudoRandomGeneratorSeed(gen, time*100.0f);
   curandGenerateUniform(gen, (float*)rand_d, 3*w*h);
 
   dim3 block(BLOCK_SIZE, BLOCK_SIZE);
 	dim3 grid(w/block.x, h/block.y);
 
   initBuffersKernel<<<grid, block>>>(
-    w,h,campos,A,B,C,rand_d,flags_d,rays_d,col_d,film_d,filmIters
+    w,h,campos,A,B,C,lensRadius,focalDist,rand_d,flags_d,rays_d,col_d,film_d,filmIters
   );
   for (int i=0; i<PATH_DEPTH; ++i)
     calcColorKernel<<<grid, block>>>(

@@ -1,18 +1,21 @@
 #include "Camera.h"
 
 Camera::Camera() :
-m_rotationAmount(0.005f),
-m_panAmount(0.04f),
-m_zoomAmount(0.05f),
 m_currXZRads(0.0f),
 m_currYRads(0.0f),
+m_position(0.0f),
+m_upDir(0.0f, 1.0f, 0.0f),
+m_lookDir(0.0f, 0.0f, 1.0f),
+m_rightDir(glm::cross(m_lookDir, m_upDir)),
 m_nearPlane(0.1f),
 m_farPlane(1000.0f),
 m_fov(45.0f),
 m_aspect(1.0f),
-m_upDir(0.0f, 1.0f, 0.0f),
-m_lookDir(0.0f, 0.0f, 1.0f),
-m_rightDir(glm::cross(m_lookDir, m_upDir))
+m_rotationAmount(0.005f),
+m_panAmount(0.04f),
+m_zoomAmount(0.05f),
+m_lensRadius(0.5f),
+m_focalDist(5.0f)
 {
 }
 

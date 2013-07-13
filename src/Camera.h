@@ -27,7 +27,10 @@ public:
   glm::vec3 getLookAt();
   glm::vec3 getUp();
   float getAspect();
-  float getFOV();
+  float getFOV();  
+
+  float m_lensRadius;
+  float m_focalDist;
 
 protected:
   float m_currXZRads;
