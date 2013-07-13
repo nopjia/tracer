@@ -125,10 +125,27 @@ __global__ void calcColorKernel(
 
     col[idx] *= scene[hit.m_id].m_material.m_color;// * scene[hit.m_id].m_material.m_brdf;
 
-    if (scene[hit.m_id].m_material.m_type == Material::DIFF)
+    if (scene[hit.m_id].m_material.m_type == Material::DIFF) {
       rays[idx].m_dir = Utils::randVectorHem(rand[idx].x,rand[idx].y,hit.m_nor);
-    else if (scene[hit.m_id].m_material.m_type == Material::MIRR)
-      rays[idx].m_dir = glm::reflect(rays[idx].m_dir, hit.m_nor);
+    }
+    else if (scene[hit.m_id].m_material.m_type == Material::MIRR) {
+      float n1 = 1.0f;
+      float n2 = scene[hit.m_id].m_material.m_n;
+      glm::vec3 nor = hit.m_nor;
+      // if coming from inside
+      if (glm::dot(rays[idx].m_dir,hit.m_nor) > 0.0f) {
+        float temp = n1;
+        n1 = n2;
+        n2 = temp;
+        nor = -nor;
+      }
+        
+      float reflectance = Material::reflectance(hit.m_nor, rays[idx].m_dir, n1, n2);
+      if (rand[idx].x < reflectance)
+        rays[idx].m_dir = glm::reflect(rays[idx].m_dir, hit.m_nor);
+      else
+        rays[idx].m_dir = glm::refract(rays[idx].m_dir, nor, n1/n2);
+    }
     rays[idx].m_pos = hit.m_pos + EPS*rays[idx].m_dir;
   }
 }

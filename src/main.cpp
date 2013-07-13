@@ -80,6 +80,13 @@ void mytest() {
   //hit = Ray::intersect(ray, *scene[1]);
   //hit = Ray::intersectScene(ray, (const Object::Object**)scene.data(), scene.size());
   hit;
+
+  // test refract
+  glm::vec3 n1(0.0f, 1.0f, 0.0f);
+  glm::vec3 v1 = glm::normalize(glm::vec3(1.0f, 1.0f, 0.0f));
+  glm::vec3 result1 = glm::refract(v1, n1, 1.0f/1.4f);
+  glm::vec3 result2 = glm::refract(v1, n1, 1.4f/1.2f);
+  result1; result2;
 }
 
 int main(int argc, char **argv) {
@@ -120,7 +127,7 @@ int main(int argc, char **argv) {
   loadScene();
   loadSceneCUDA();
 
-  //mytest();
+  mytest();
 
   glutMainLoop();
   cudaThreadExit();
@@ -408,11 +415,12 @@ void loadScene() {
   //obj->m_material.m_emit = 10.0f;
   //scene.push_back(obj);
 
-  obj = Object::newObject(Mesh::loadObj("data/icosahedron.obj"));
+  obj = Object::newObject(Mesh::loadObj("data/unitcube.obj"));
   Object::scale(*obj, 2.0f);
   Object::translate(*obj, glm::vec3(0.0f, -3.0f, 0.0f));
-  obj->m_material.m_color = glm::vec3(1.0, 0.5, 1.0);
+  obj->m_material.m_color = glm::vec3(1.0f, 1.0f, 0.5f);
   obj->m_material.m_type = Material::MIRR;
+  obj->m_material.m_n = 1.05f;
   scene.push_back(obj);
 }
 

@@ -8,11 +8,18 @@ get FPS
 load obj normals
 per vertex normals
 barycentric interp
+path trace
+film memory
+FIX NOW : BUG : ray intersection, distortion
 
 -----
 
-path trace
-film memory
+color bleeding? do Karl's way with 2 buffers
+
+fresnel reflection / refraction
+focal blur
+
+exit / cleanup CUDA correctly?
 
 optimize intersections
 use tmin for intersection comparison
@@ -21,10 +28,6 @@ wave-front kernels
 
 kd-tree: obj tree, scene tree
 
-exit / cleanup CUDA correctly?
-
 -----
-
-FIX NOW : BUG : ray intersection, distortion
 
 bug: obj loader need endline at end of .obj file
