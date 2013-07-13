@@ -30,9 +30,9 @@ typedef unsigned int uint;
 
 #define EPS   0.01f
 
-#define WINDOW_W    256
-#define WINDOW_H    256
-#define PIXSCALE    1
+#define WINDOW_W    512
+#define WINDOW_H    512
+#define PIXSCALE    2
 #define DELTA_T     0.01f
 #define BLOCK_SIZE  32
 
@@ -44,7 +44,7 @@ typedef unsigned int uint;
 
 // options
 #define TRI_NORM_INTERP
-#define FOCAL_BLUR
+//#define FOCAL_BLUR
 
 // render modes
 #define MODE_RAYTRACE1  1

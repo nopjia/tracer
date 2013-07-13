@@ -11,15 +11,18 @@ barycentric interp
 path trace
 film memory
 FIX NOW : BUG : ray intersection, distortion
+do Karl's 2 buffers - DOES NOT WORK
+focal blur - BAD random not on disk
 
 -----
 
-color bleeding? do Karl's way with 2 buffers
+color bleeding
 
 fresnel reflection / refraction
-focal blur
 
 exit / cleanup CUDA correctly?
+
+do spheres
 
 optimize intersections
 use tmin for intersection comparison

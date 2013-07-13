@@ -165,13 +165,12 @@ void getFPS() {
 
   uint elapsed = currTime - timeBase;
   if (elapsed > 1000) {
-    float fps = frameCount*1000.0f/(elapsed);
-    float milisecs = elapsed / frameCount;
+    float fps = frameCount*1000.0f/elapsed;
     timeBase = currTime;
     frameCount = 0;
 
     char buffer[32];
-    sprintf(buffer, "%.4f : %.0f : %u", fps, milisecs, filmIters);
+    sprintf(buffer, "%.4f : %u", fps, filmIters);
     glutSetWindowTitle(buffer);
   }
 
