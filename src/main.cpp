@@ -20,7 +20,7 @@ namespace {
   FullScreenQuad fullScreenQuad;
   ThirdPersonCamera camera;
 
-  std::vector<Object::Object*> scene;
+  std::vector<Object::Object> scene;
   Object::Object* scene_d;  // pointer to device
   Ray::Ray* rays_d;
   glm::vec3* col_d;
@@ -77,10 +77,10 @@ void mytest() {
   //  tris[i] = Mesh::getTriangle(mesh, i);
   //}
 
-  hit = Ray::intersect(ray, *scene.data()[1]->m_mesh);  
+  //hit = Ray::intersect(ray, *scene.data()[1]->m_mesh);  
   //hit = Ray::intersect(ray, *scene[1]);
   //hit = Ray::intersectScene(ray, (const Object::Object**)scene.data(), scene.size());
-  hit;
+  //hit;
 
   // test refract
   //glm::vec3 n1(0.0f, 1.0f, 0.0f);
@@ -90,11 +90,9 @@ void mytest() {
   //result1; result2;
 
   // test intersect from inside
-  ray.m_pos = glm::vec3(0.0f, 0.0f, 0.0f);
+  ray.m_pos = glm::vec3(0.0f, 0.0f, -1.0f-EPS);
   ray.m_dir = glm::vec3(0.0f, 0.0f, 1.0f);
-  Object::Object *obj = Object::newObject(Mesh::newGeometry(Mesh::CUBE));
-  Object::scale(*obj, 2.0f);
-  hit = Ray::intersect(ray, *obj);
+  hit = Ray::intersectScene(ray, (const Object::Object*)scene.data(), scene.size());
   hit;
 }
 
@@ -383,7 +381,7 @@ void loadScene() {
   Object::scale(*obj, BOX_HDIM*2.0f);
   Object::translate(*obj, glm::vec3(0.0f, -BOX_HDIM.y, 0.0f));
   obj->m_material.m_color = glm::vec3(1.0f);
-  scene.push_back(obj);
+  scene.push_back(*obj);
   // top +y
   obj = Object::newObject(planemesh);
   Object::rotate(*obj, glm::angleAxis(180.0f, glm::vec3(1.0f, 0.0f, 0.0f)));
@@ -391,35 +389,35 @@ void loadScene() {
   Object::translate(*obj, glm::vec3(0.0f, BOX_HDIM.y, 0.0f));
   obj->m_material.m_color = glm::vec3(1.0f, 1.0f, 1.0f);
   obj->m_material.m_emit = 2.0f;
-  scene.push_back(obj);
+  scene.push_back(*obj);
   // back -z
   obj = Object::newObject(planemesh);
   Object::rotate(*obj, glm::angleAxis(90.0f, glm::vec3(1.0f, 0.0f, 0.0f)));
   Object::scale(*obj, BOX_HDIM*2.0f);
   Object::translate(*obj, glm::vec3(0.0f, 0.0f, -BOX_HDIM.z));
   obj->m_material.m_color = glm::vec3(1.0f);
-  scene.push_back(obj);
+  scene.push_back(*obj);
   // front +z
   //obj = Object::newObject(planemesh);
   //Object::rotate(*obj, glm::angleAxis(-90.0f, glm::vec3(1.0f, 0.0f, 0.0f)));
   //Object::scale(*obj, BOX_HDIM*2.0f);
   //Object::translate(*obj, glm::vec3(0.0f, 0.0f, BOX_HDIM.z));
   //obj->m_material.m_color = glm::vec3(1.0f);
-  //scene.push_back(obj);
+  //scene.push_back(*obj);
   // right +x
   obj = Object::newObject(planemesh);
   Object::rotate(*obj, glm::angleAxis(90.0f, glm::vec3(0.0f, 0.0f, 1.0f)));
   Object::scale(*obj, BOX_HDIM*2.0f);
   Object::translate(*obj, glm::vec3(BOX_HDIM.x, 0.0f, 0.0f));
   obj->m_material.m_color = glm::vec3(0.0f, 0.0f, 1.0f);
-  scene.push_back(obj);
+  scene.push_back(*obj);
   // left -x
   obj = Object::newObject(planemesh);
   Object::rotate(*obj, glm::angleAxis(-90.0f, glm::vec3(0.0f, 0.0f, 1.0f)));
   Object::scale(*obj, BOX_HDIM*2.0f);
   Object::translate(*obj, glm::vec3(-BOX_HDIM.x, 0.0f, 0.0f));
   obj->m_material.m_color = glm::vec3(1.0f, 0.0f, 0.0f);
-  scene.push_back(obj);
+  scene.push_back(*obj);
   
   //// ceiling light
   //obj = Object::newObject(Mesh::newGeometry(Mesh::CUBE));
@@ -427,17 +425,17 @@ void loadScene() {
   //Object::translate(*obj, glm::vec3(0.0f, BOX_HDIM.y, 0.0f));
   //obj->m_material.m_color = glm::vec3(1.0f, 1.0f, 1.0f);
   //obj->m_material.m_emit = 5.0f;
-  //scene.push_back(obj);
+  //scene.push_back(*obj);
 
   //obj = Object::newObject(Mesh::loadObj("data/icosahedron.obj"));
   //obj = Object::newObject(Mesh::loadObj("data/unitcube.obj"));
-  obj = Object::newObject(Mesh::newGeometry(Mesh::SPHERE));
-  Object::scale(*obj, 3.0f);
-  Object::translate(*obj, glm::vec3(0.0f, -3.0f, 0.0f));
+  obj = Object::newObject(Mesh::newGeometry(Mesh::CUBE));
+  Object::scale(*obj, 2.0f);
+  //Object::translate(*obj, glm::vec3(0.0f, -3.0f, 0.0f));
   obj->m_material.m_color = glm::vec3(1.0f, 1.0f, 0.8f);
   obj->m_material.m_type = Material::TRANS;
   obj->m_material.m_n = 2.4f;
-  scene.push_back(obj);
+  scene.push_back(*obj);
 
   //obj = Object::newObject(Mesh::newGeometry(Mesh::SPHERE));
   //Object::scale(*obj, 3.0f);
@@ -445,7 +443,7 @@ void loadScene() {
   //obj->m_material.m_color = glm::vec3(1.0f, 1.0f, 0.8f);
   //obj->m_material.m_type = Material::MIRR;
   //obj->m_material.m_n = 2.2f;
-  //scene.push_back(obj);
+  //scene.push_back(*obj);
   //obj = Object::newObject(Mesh::newGeometry(Mesh::CUBE));
   //Object::scale(*obj, glm::vec3(2.0f, 3.0f, 2.0f));
   //Object::rotate(*obj, glm::angleAxis(30.0f, glm::vec3(0.0f, 1.0f, 0.0f)));
@@ -453,7 +451,7 @@ void loadScene() {
   //obj->m_material.m_color = glm::vec3(0.5f, 1.0f, 0.5f);
   //obj->m_material.m_type = Material::MIRR;
   //obj->m_material.m_n = 1.2f;
-  //scene.push_back(obj);
+  //scene.push_back(*obj);
 }
 
 void initMemoryCUDA() {
@@ -472,7 +470,7 @@ void loadSceneCUDA() {
   Object::Object* scene_hd = (Object::Object*)malloc(sceneMemSize);
 
   for (int i=0; i<scene.size(); ++i) {
-    Object::Object& obj = *(scene[i]);
+    Object::Object& obj = scene[i];
 
     memcpy(&scene_hd[i], &obj, objectMemSize);
 
