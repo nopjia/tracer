@@ -44,6 +44,7 @@ typedef unsigned int uint;
 
 // options
 #define TRI_NORM_INTERP
+//#define GAMMA_CORRECT
 //#define FOCAL_BLUR
 
 

@@ -150,7 +150,12 @@ __global__ void accumColorKernel(
   uint idx = y*w + x;
 
   film[idx] += col[idx];
+
+#ifdef GAMMA_CORRECT
+  pbo_out[idx] = rgbToInt( glm::pow(film[idx]/filmIters, glm::vec3(1.0f/2.2f)) );
+#else
   pbo_out[idx] = rgbToInt(film[idx]/filmIters);
+#endif
   //pbo_out[idx] = rgbToInt(col[idx]);
 }
 

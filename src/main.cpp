@@ -259,7 +259,7 @@ void initScene() {
 
   ////obj = Object::newObject(Mesh::loadObj("data/icosahedron.obj"));
   //obj = Object::newObject(Mesh::loadObj("data/unitcube.obj"));
-  obj = Object::newObject(Mesh::newGeometry(Mesh::SPHERE));
+  obj = Object::newObject(Mesh::newGeometry(Mesh::CUBE));
   //Object::scale(*obj, glm::vec3(4.0f,4.0f,1.0f));
   Object::scale(*obj, 3.0f);
   //Object::translate(*obj, glm::vec3(0.0f, -3.0f, 0.0f));

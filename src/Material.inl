@@ -66,19 +66,19 @@ namespace Material {
     return (rOrth*rOrth+rPar*rPar) / 2.0f;
   }
 
-  glm::vec3 bounce(const Material& mat, const glm::vec3& ro, const glm::vec3& nor, const glm::vec3& randvec) {
+  glm::vec3 bounce(const Material& mat, const glm::vec3& rd, const glm::vec3& nor, const glm::vec3& randvec) {
     if (mat.m_type == DIFF) {
       return Utils::randVectorHem(randvec.x,randvec.y,nor);
     }
     else if (mat.m_type == MIRR) {
-      return glm::reflect(ro, nor);
+      return glm::reflect(rd, nor);
     }
     else if (mat.m_type == TRANS) {
       float n1, n2;
       glm::vec3 nnor;      
 
       // from outside
-      if (glm::dot(ro,nor) < 0.0f) {        
+      if (glm::dot(rd,nor) < 0.0f) {        
         n1 = 1.0f;
         n2 = mat.m_n;
         nnor = nor;
@@ -90,18 +90,18 @@ namespace Material {
         nnor = -nor;
       }
       
-      //return glm::refract(ro, nnor, n1/n2);
+      //return glm::refract(rd, nnor, n1/n2);
 
-      //glm::vec3 result = glm::refract(ro, nnor, n1/n2);
+      //glm::vec3 result = glm::refract(rd, nnor, n1/n2);
       //return result == glm::vec3(0.0f) ?
-      //  glm::reflect(ro, nnor) : 
+      //  glm::reflect(rd, nnor) : 
       //  result;
 
-      float refl = reflectance(ro, nnor, n1, n2);
+      float refl = reflectance(rd, nnor, n1, n2);
       if (randvec.x < refl)
-        return glm::reflect(ro, nnor);
+        return glm::reflect(rd, nnor);
       else
-        return glm::refract(ro, nnor, n1/n2);
+        return glm::refract(rd, nnor, n1/n2);
     }
   }
 
