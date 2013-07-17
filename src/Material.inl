@@ -41,18 +41,29 @@ namespace Material {
 // Function Implementation
 //---------------------------------------------------------
 
+  //float reflectance(const glm::vec3& inc, const glm::vec3& nor, const float n1, const float n2) {
+  //  float r0 = (n1-n2)/(n1+n2);
+  //  r0 *= r0;
+  //  float cosI = -glm::dot(nor, inc);
+  //  if (n1 > n2) {
+  //    float n = n1/n2;
+  //    float sinT2 = n*n*(1.0f-cosI*cosI);
+  //    if (sinT2 > 1.0f) return 1.0f; // total internal reflection
+  //    cosI = glm::sqrt(1.0f-sinT2);
+  //  }
+  //  float x = 1.0f - cosI;
+  //  return r0 + (1.0f-r0) * x*x*x*x*x;
+  //}
+
   float reflectance(const glm::vec3& inc, const glm::vec3& nor, const float n1, const float n2) {
-    float r0 = (n1-n2)/(n1+n2);
-    r0 *= r0;
+    float n = n1/n2;
     float cosI = -glm::dot(nor, inc);
-    if (n1 > n2) {
-      float n = n1/n2;
-      float sinT2 = n*n*(1.0f-cosI*cosI);
-      if (sinT2 > 1.0) return 1.0; // total internal reflection
-      cosI = glm::sqrt(1.0f-sinT2);
-    }
-    float x = 1.0f - cosI;
-    return r0 + (1.0f-r0) * x*x*x*x*x;
+    float sinT2 = n*n*(1.0f-cosI*cosI);
+    if (sinT2 > 1.0f) return 1.0f; // TIR
+    float cosT = glm::sqrt(1.0f-sinT2);
+    float rOrth = (n1*cosI-n2*cosT) / (n1*cosI+n2*cosT);
+    float rPar = (n2*cosI-n1*cosT) / (n2*cosI+n1*cosT);
+    return (rOrth*rOrth+rPar*rPar) / 2.0f;
   }
 
   glm::vec3 bounce(const Material& mat, const glm::vec3& ro, const glm::vec3& nor, const glm::vec3& randvec) {
@@ -79,6 +90,10 @@ namespace Material {
         nnor = -nor;
       }
       
+      //glm::vec3 result = glm::refract(ro, nnor, n1/n2);
+      //return result == glm::vec3(0.0f) ?
+      //  glm::reflect(ro, nnor) : 
+      //  result;
       float refl = reflectance(ro, nnor, n1, n2);
       if (randvec.x < refl)
         return glm::reflect(ro, nnor);

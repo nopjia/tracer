@@ -133,7 +133,7 @@ __global__ void calcColorKernel(
 
     col[idx] *= scene[hit.m_id].m_material.m_color;// * scene[hit.m_id].m_material.m_brdf;
 
-    rays[idx].m_dir = Material::bounce(scene[hit.m_id].m_material, 
+    rays[idx].m_dir = Material::bounce(scene[hit.m_id].m_material,
       rays[idx].m_dir, hit.m_nor, rand[idx]);
     rays[idx].m_pos = hit.m_pos + EPS*rays[idx].m_dir;
   }
