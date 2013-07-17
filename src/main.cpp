@@ -5,6 +5,10 @@
 #include "Mesh.h"
 #include "Ray.inl"
 
+//---------------------------------------------------------
+// DECLARATIONS
+//---------------------------------------------------------
+
 namespace {
   int mouseX, mouseY;
   int mouseButtons = 0;   // 0x1 left, 0x2 middle, 0x4 right
@@ -17,7 +21,6 @@ namespace {
   std::vector<Object::Object> scene;
 }
 
-// global methods
 void initGL();
 void initCUDA (int argc, char **argv);
 void initScene();
@@ -27,38 +30,9 @@ void keyboard(unsigned char key, int x, int y);
 void mouse(int button, int state, int x, int y);
 void motion(int x, int y);
 
-void mytest() {
-  Ray::Ray ray;
-  Ray::Hit hit;
-
-  ray.m_pos = glm::vec3(0.0f, 0.5f, -5.0f);
-  ray.m_dir = glm::vec3(0.0f, 0.0f, 1.0f);
-  
-  //Mesh::Mesh& mesh = *scene.data()[0]->m_mesh;
-  //Mesh::Triangle* tris = new Mesh::Triangle[mesh.m_numFaces];
-  //for (int i=0; i<mesh.m_numFaces; ++i) {
-  //  std::printf("%i f %u %u %u\n", i, mesh.m_faces[i].m_v[0]+1, mesh.m_faces[i].m_v[1]+1, mesh.m_faces[i].m_v[2]+1);
-  //  tris[i] = Mesh::getTriangle(mesh, i);
-  //}
-
-  //hit = Ray::intersect(ray, *scene.data()[1]->m_mesh);  
-  //hit = Ray::intersect(ray, *scene[1]);
-  //hit = Ray::intersectScene(ray, (const Object::Object**)scene.data(), scene.size());
-  //hit;
-
-  // test refract
-  //glm::vec3 n1(0.0f, 1.0f, 0.0f);
-  //glm::vec3 v1 = glm::normalize(glm::vec3(1.0f, 1.0f, 0.0f));
-  //glm::vec3 result1 = glm::refract(v1, n1, 1.0f/1.4f);
-  //glm::vec3 result2 = glm::refract(v1, n1, 1.4f/1.2f);
-  //result1; result2;
-
-  // test intersect from inside
-  ray.m_pos = glm::vec3(0.0f, 0.0f, -1.0f-EPS);
-  ray.m_dir = glm::vec3(0.0f, 0.0f, 1.0f);
-  hit = Ray::intersectScene(ray, (const Object::Object*)scene.data(), scene.size());
-  hit;
-}
+//---------------------------------------------------------
+// INITIALIZE
+//---------------------------------------------------------
 
 int main(int argc, char **argv) {
   glutInit(&argc, argv);
@@ -93,12 +67,11 @@ int main(int argc, char **argv) {
   
   initGL();
   initCUDA(argc, argv);
+
   initScene();
 
   renderer.init();
   renderer.initScene(scene.data(), scene.size());
-
-  mytest();
 
   glutMainLoop();
   cudaThreadExit();
@@ -112,11 +85,20 @@ void initGL() {
   std::cout << "OpenGL " << glGetString(GL_VERSION) 
     << "\nGLSL " << glGetString(GL_SHADING_LANGUAGE_VERSION)
     << std::endl;
-
   glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
-
   glDisable(GL_DEPTH_TEST);
 }
+
+void initCUDA (int argc, char **argv) {
+  if (checkCmdLineFlag(argc, (const char **)argv, "device"))
+    gpuGLDeviceInit(argc, (const char **)argv);
+  else
+    cudaGLSetGLDevice(gpuGetMaxGflopsDeviceId());
+}
+
+//---------------------------------------------------------
+// WINDOW CALLBACKS
+//---------------------------------------------------------
 
 void resize(int width, int height) {
   glViewport(0, 0, width, height);
@@ -137,7 +119,6 @@ void getFPS() {
     sprintf(buffer, "%.4f : %u", fps, renderer.getIterations());
     glutSetWindowTitle(buffer);
   }
-
 }
 
 void draw() {
@@ -209,25 +190,16 @@ void motion(int x, int y) {
   mouseY = y;
 }
 
-void initCUDA (int argc, char **argv) {
-  if (checkCmdLineFlag(argc, (const char **)argv, "device"))
-  {
-    gpuGLDeviceInit(argc, (const char **)argv);
-  }
-  else 
-  {
-    cudaGLSetGLDevice(gpuGetMaxGflopsDeviceId());
-  }
-}
+//---------------------------------------------------------
+// Scene
+//---------------------------------------------------------
 
-void initScene() {
-  
+void initScene() {  
   camera.setFOV(FOV);
   camera.setAspect(WINDOW_W, WINDOW_H);
   camera.zoom(-10.0f);
   camera.update();
-
-
+  
   const glm::vec3 BOX_HDIM (5.0f);
 
   Object::Object* obj;
