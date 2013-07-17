@@ -6,6 +6,14 @@ namespace Mesh {
   Mesh* newGeometry(const MeshType type) {
     Mesh* mesh = (Mesh*)malloc(sizeof(Mesh));
     mesh->m_type = type;
+    mesh->m_bmin = glm::vec3(-0.5f);
+    mesh->m_bmax = glm::vec3(0.5f);
+    mesh->m_faces = NULL;
+    mesh->m_norms = NULL;
+    mesh->m_verts = NULL;
+    mesh->m_numFaces = 0;
+    mesh->m_numNorms = 0;
+    mesh->m_numVerts = 0;
     return mesh;
   }
 

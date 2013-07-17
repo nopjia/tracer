@@ -34,14 +34,14 @@ namespace Material {
   };
 
   // forward declarations
-  HOST DEVICE extern inline float reflectance(const glm::vec3 nor, const glm::vec3 inc, const float n1, const float n2);
-  HOST DEVICE extern inline glm::vec3 bounce(const Material mat, const glm::vec3 ro, const glm::vec3 nor, const glm::vec3 randvec);
+  HOST DEVICE extern inline float reflectance(const glm::vec3& nor, const glm::vec3& inc, const float n1, const float n2);
+  HOST DEVICE extern inline glm::vec3 bounce(const Material& mat, const glm::vec3& ro, const glm::vec3& nor, const glm::vec3& randvec);
 
 //---------------------------------------------------------
 // Function Implementation
 //---------------------------------------------------------
 
-  float reflectance(const glm::vec3 nor, const glm::vec3 inc, const float n1, const float n2) {
+  float reflectance(const glm::vec3& nor, const glm::vec3& inc, const float n1, const float n2) {
     float r0 = (n1-n2)/(n1+n2);
     r0 *= r0;
     float cosI = -glm::dot(nor, inc);
@@ -55,7 +55,7 @@ namespace Material {
     return r0 + (1.0-r0) * x*x*x*x*x;
   }
 
-  glm::vec3 bounce(const Material mat, const glm::vec3 ro, const glm::vec3 nor, const glm::vec3 randvec) {
+  glm::vec3 bounce(const Material& mat, const glm::vec3& ro, const glm::vec3& nor, const glm::vec3& randvec) {
     if (mat.m_type == DIFF) {
       return Utils::randVectorHem(randvec.x,randvec.y,nor);
     }

@@ -83,11 +83,19 @@ void mytest() {
   hit;
 
   // test refract
-  glm::vec3 n1(0.0f, 1.0f, 0.0f);
-  glm::vec3 v1 = glm::normalize(glm::vec3(1.0f, 1.0f, 0.0f));
-  glm::vec3 result1 = glm::refract(v1, n1, 1.0f/1.4f);
-  glm::vec3 result2 = glm::refract(v1, n1, 1.4f/1.2f);
-  result1; result2;
+  //glm::vec3 n1(0.0f, 1.0f, 0.0f);
+  //glm::vec3 v1 = glm::normalize(glm::vec3(1.0f, 1.0f, 0.0f));
+  //glm::vec3 result1 = glm::refract(v1, n1, 1.0f/1.4f);
+  //glm::vec3 result2 = glm::refract(v1, n1, 1.4f/1.2f);
+  //result1; result2;
+
+  // test intersect from inside
+  ray.m_pos = glm::vec3(0.0f, 0.0f, 0.0f);
+  ray.m_dir = glm::vec3(0.0f, 0.0f, 1.0f);
+  Object::Object *obj = Object::newObject(Mesh::newGeometry(Mesh::CUBE));
+  Object::scale(*obj, 2.0f);
+  hit = Ray::intersect(ray, *obj);
+  hit;
 }
 
 int main(int argc, char **argv) {
@@ -124,7 +132,7 @@ int main(int argc, char **argv) {
   initGL();
   initCUDA(argc, argv);
   initPBO();
-  initMemoryCUDA();
+  initMemoryCUDA();  
   loadScene();
   loadSceneCUDA();
 

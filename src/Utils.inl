@@ -7,7 +7,7 @@
 
 namespace Utils {
 
-  HOST DEVICE extern inline float rand(glm::vec3 seed) {
+  HOST DEVICE extern inline float rand(glm::vec3& seed) {
       return glm::fract(glm::sin(glm::dot(seed,glm::vec3(93.5734, 12.9898, 78.2331))) * 43758.5453);
   }
 
