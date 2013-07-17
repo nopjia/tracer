@@ -203,8 +203,9 @@ void initScene() {
   const glm::vec3 BOX_HDIM (5.0f);
 
   Object::Object* obj;
+  //Mesh::Mesh* planemesh = Mesh::loadObj("data/unitplane.obj");
+  Mesh::Mesh* planemesh = Mesh::newGeometry(Mesh::PLANE);
 
-  Mesh::Mesh* planemesh = Mesh::loadObj("data/unitplane.obj");
   // bottom -y
   obj = Object::newObject(planemesh);
   Object::scale(*obj, BOX_HDIM*2.0f);
@@ -258,13 +259,13 @@ void initScene() {
 
   ////obj = Object::newObject(Mesh::loadObj("data/icosahedron.obj"));
   ////obj = Object::newObject(Mesh::loadObj("data/unitcube.obj"));
-  //obj = Object::newObject(Mesh::newGeometry(Mesh::CUBE));
+  obj = Object::newObject(Mesh::newGeometry(Mesh::CUBE));
   //Object::scale(*obj, glm::vec3(4.0f,4.0f,1.0f));
-  ////Object::scale(*obj, 2.0f);
-  //obj->m_material.m_color = glm::vec3(1.0f, 1.0f, 0.8f);
-  //obj->m_material.m_type = Material::TRANS;
-  //obj->m_material.m_n = 1.4f;
-  //scene.push_back(*obj);
+  Object::scale(*obj, 2.0f);
+  obj->m_material.m_color = glm::vec3(1.0f, 1.0f, 0.8f);
+  obj->m_material.m_type = Material::TRANS;
+  obj->m_material.m_n = 1.1f;
+  scene.push_back(*obj);
 
   //obj = Object::newObject(Mesh::newGeometry(Mesh::SPHERE));
   //Object::scale(*obj, 3.0f);

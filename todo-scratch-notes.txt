@@ -19,6 +19,8 @@ fix fresnel - fresnel handles TIL - I think it works? low n
 
 color bleeding
 
+jitter within pixel
+
 object picking / moving
 
 focal blur - BAD random not on disk

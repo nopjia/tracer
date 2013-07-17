@@ -139,6 +139,23 @@ namespace Ray {
       return hit;
     }
 
+    else if (mesh.m_type == Mesh::PLANE) {
+      Hit hit;
+      hit.m_nor = glm::vec3(0.0f, 1.0f, 0.0f);
+      hit.m_t = -(glm::dot(ray.m_pos,hit.m_nor)) / glm::dot(ray.m_dir,hit.m_nor);      
+      hit.m_pos = ray.m_pos + hit.m_t*ray.m_dir;
+
+      if (hit.m_pos.x < 0.5 && hit.m_pos.z < 0.5 &&
+        hit.m_pos.x > -0.5 && hit.m_pos.z > -0.5) 
+      {
+        return hit;
+      }
+      else {
+        return Hit();
+      }
+
+    }
+
     else if (mesh.m_type == Mesh::MESH) {
       glm::vec3 tMin = (mesh.m_bmin-ray.m_pos) / ray.m_dir;
       glm::vec3 tMax = (mesh.m_bmax-ray.m_pos) / ray.m_dir;
