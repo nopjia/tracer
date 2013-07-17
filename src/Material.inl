@@ -47,12 +47,12 @@ namespace Material {
     float cosI = -glm::dot(nor, inc);
     if (n1 > n2) {
       float n = n1/n2;
-      float sinT2 = n*n*(1.0-cosI*cosI);
+      float sinT2 = n*n*(1.0f-cosI*cosI);
       if (sinT2 > 1.0) return 1.0; // total internal reflection
-      cosI = glm::sqrt(1.0-sinT2);
+      cosI = glm::sqrt(1.0f-sinT2);
     }
-    float x = 1.0 - cosI;
-    return r0 + (1.0-r0) * x*x*x*x*x;
+    float x = 1.0f - cosI;
+    return r0 + (1.0f-r0) * x*x*x*x*x;
   }
 
   glm::vec3 bounce(const Material& mat, const glm::vec3& ro, const glm::vec3& nor, const glm::vec3& randvec) {

@@ -19,11 +19,13 @@ fix fresnel - fresnel handles TIL - I think it works? low n
 
 color bleeding
 
+object picking / moving
+
 focal blur - BAD random not on disk
 
-exit / cleanup CUDA correctly?
+normal un-transform incorrectly with non-uniform scaling?
 
-object picking / moving
+exit / cleanup CUDA correctly?
 
 optimize intersections
 use tmin for intersection comparison

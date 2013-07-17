@@ -23,11 +23,11 @@ public:
   void setFOV(float fov);
   void setFarNearPlanes(float nearPlane, float farPlane);
 
-  glm::vec3 getPosition();
-  glm::vec3 getLookAt();
-  glm::vec3 getUp();
-  float getAspect();
-  float getFOV();  
+  glm::vec3 getPosition() const;
+  glm::vec3 getLookAt() const;
+  glm::vec3 getUp() const;
+  float getAspect() const;
+  float getFOV() const;
 
   float m_lensRadius;
   float m_focalDist;

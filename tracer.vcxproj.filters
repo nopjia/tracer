@@ -10,6 +10,10 @@
     <ClCompile Include="src\Camera.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\Renderer.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -42,6 +46,9 @@
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="src\Mesh.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Renderer.h">
       <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>

@@ -96,6 +96,8 @@
     <ClCompile Include="externals\gl3w.c" />
     <ClCompile Include="src\Camera.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Renderer.cpp" />
+    <ClCompile Include="src\Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -111,6 +113,7 @@
     <ClInclude Include="src\Mesh.h" />
     <ClInclude Include="src\Mesh.inl" />
     <ClInclude Include="src\Object.inl" />
+    <ClInclude Include="src\Renderer.h" />
     <ClInclude Include="src\Utils.h" />
   </ItemGroup>
   <ItemGroup>

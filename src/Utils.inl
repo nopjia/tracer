@@ -8,7 +8,7 @@
 namespace Utils {
 
   HOST DEVICE extern inline float rand(glm::vec3& seed) {
-      return glm::fract(glm::sin(glm::dot(seed,glm::vec3(93.5734, 12.9898, 78.2331))) * 43758.5453);
+      return glm::fract(glm::sin(glm::dot(seed,glm::vec3(93.5734f, 12.9898f, 78.2331f))) * 43758.5453f);
   }
 
   // http://stackoverflow.com/questions/5408276/python-uniform-spherical-distribution

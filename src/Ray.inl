@@ -67,7 +67,7 @@ namespace Ray {
     float mindist = FLT_MAX;
     Hit minhit;
 
-    for (int i=0; i<size; ++i) {
+    for (uint i=0; i<size; ++i) {
       Hit h ( intersect(ray, scene[i]) );
       if (h.m_t > 0.0f) {
         glm::vec3 subtract = ray.m_pos - h.m_pos;
@@ -97,8 +97,6 @@ namespace Ray {
       // transfrom hit, object to world space
       return transform(hit, obj.m_matrix);
     }
-
-    return hit;
   }
 
   Hit intersect(const Ray& ray, const Mesh::Mesh& mesh) {
@@ -153,7 +151,7 @@ namespace Ray {
       // loop triangles and return intersection
       Hit hit;
       hit.m_t = FLT_MAX;
-      for (int i=0; i<mesh.m_numFaces; ++i) {      
+      for (uint i=0; i<mesh.m_numFaces; ++i) {      
         Hit thit = intersect(ray, Mesh::getTriangle(mesh,i));
         if (thit.m_t > 0.0f && thit.m_t < hit.m_t) {
           hit = thit;

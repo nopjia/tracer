@@ -41,23 +41,23 @@ void Camera::setFOV(float fov)
 {
   m_fov = fov;
 }
-glm::vec3 Camera::getPosition() 
+glm::vec3 Camera::getPosition()  const
 {
   return m_position;
 }
-glm::vec3 Camera::getLookAt() 
+glm::vec3 Camera::getLookAt() const
 {
   return m_lookAt;
 }
-glm::vec3 Camera::getUp() 
+glm::vec3 Camera::getUp() const
 {
   return m_upDir;
 }
-float Camera::getAspect() 
+float Camera::getAspect() const
 {
   return m_aspect;
 }
-float Camera::getFOV() 
+float Camera::getFOV() const
 {
   return m_fov;
 }
