@@ -141,11 +141,13 @@ void keyboard(unsigned char key, int x, int y) {
     case('f') : 
       camera.m_focalDist += 0.1f; 
       renderer.resetFilm();
+      printf("focalDist: %.2f\n", camera.m_focalDist);
       break;
     case('F') : 
       if (camera.m_focalDist > 0.0f) {
         camera.m_focalDist -= 0.1f;
         renderer.resetFilm();
+        printf("focalDist: %.2f\n", camera.m_focalDist);
       }
       break;
   }

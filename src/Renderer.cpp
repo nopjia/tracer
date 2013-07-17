@@ -162,7 +162,7 @@ void Renderer::render(const Camera& camera, float time) {
     // calc B (screen y) then scale down relative to aspect
     // fov is for screen x axis
     A = glm::normalize(glm::cross(C,camera.getUp()));
-    B = glm::float32(-1.0/(camera.getAspect()))*glm::normalize(glm::cross(A,C));
+    B = 1.0f/camera.getAspect()*glm::normalize(glm::cross(A,C));
 
     // scale by FOV
     float tanFOV = tan(glm::radians(camera.getFOV()));
