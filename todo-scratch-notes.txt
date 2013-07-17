@@ -14,12 +14,11 @@ FIX NOW : BUG : ray intersection, distortion
 do Karl's 2 buffers - DOES NOT WORK
 spheres and cube
 fix fresnel - fresnel handles TIL - I think it works? low n
+jitter within pixel - already did that
 
 -----
 
 color bleeding
-
-jitter within pixel
 
 object picking / moving
 
