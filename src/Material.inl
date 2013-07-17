@@ -90,10 +90,13 @@ namespace Material {
         nnor = -nor;
       }
       
+      //return glm::refract(ro, nnor, n1/n2);
+
       //glm::vec3 result = glm::refract(ro, nnor, n1/n2);
       //return result == glm::vec3(0.0f) ?
       //  glm::reflect(ro, nnor) : 
       //  result;
+
       float refl = reflectance(ro, nnor, n1, n2);
       if (randvec.x < refl)
         return glm::reflect(ro, nnor);

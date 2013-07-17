@@ -154,6 +154,18 @@ __global__ void accumColorKernel(
   //pbo_out[idx] = rgbToInt(col[idx]);
 }
 
+__global__ void testRand(
+  const uint w, const uint h,
+  uint* pbo_out,
+  glm::vec3* rand
+  )
+{
+  uint x = blockIdx.x*blockDim.x + threadIdx.x;
+  uint y = blockIdx.y*blockDim.y + threadIdx.y;
+  uint idx = y*w + x;
+  pbo_out[idx] = rgbToInt(rand[idx]);
+}
+
 extern "C"
 void pathtrace(
   uint* pbo_out, const uint w, const uint h, const float time,
@@ -182,6 +194,8 @@ void pathtrace(
       w,h,time,scene_d,sceneSize,rand_d,flags_d,rays_d,col_d,i
     );
   accumColorKernel<<<grid, block>>>(w,h,pbo_out,col_d,film_d,filmIters);
+
+  //testRand<<<grid, block>>>(w,h,pbo_out,rand_d);
 }
 
 extern "C"

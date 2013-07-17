@@ -258,14 +258,14 @@ void initScene() {
   //scene.push_back(*obj);
 
   ////obj = Object::newObject(Mesh::loadObj("data/icosahedron.obj"));
-  obj = Object::newObject(Mesh::loadObj("data/unitcube.obj"));
-  //obj = Object::newObject(Mesh::newGeometry(Mesh::PLANE));
+  //obj = Object::newObject(Mesh::loadObj("data/unitcube.obj"));
+  obj = Object::newObject(Mesh::newGeometry(Mesh::SPHERE));
   //Object::scale(*obj, glm::vec3(4.0f,4.0f,1.0f));
   Object::scale(*obj, 3.0f);
   //Object::translate(*obj, glm::vec3(0.0f, -3.0f, 0.0f));
   obj->m_material.m_color = glm::vec3(1.0f, 1.0f, 0.8f);
   obj->m_material.m_type = Material::TRANS;
-  obj->m_material.m_n = 1.3f;
+  obj->m_material.m_n = 1.8f;
   scene.push_back(*obj);
 
   //obj = Object::newObject(Mesh::newGeometry(Mesh::SPHERE));
