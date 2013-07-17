@@ -2,6 +2,7 @@
 #define MATERIAL_INL
 
 #include "common.h"
+#include "Utils.inl"
 
 #include <glm/glm.hpp>
 
@@ -34,7 +35,7 @@ namespace Material {
 
   // forward declarations
   HOST DEVICE extern inline float reflectance(const glm::vec3 nor, const glm::vec3 inc, const float n1, const float n2);
-  HOST DEVICE extern inline glm::vec3 refract(const glm::vec3 nor, const glm::vec3 inc, const float n1, const float n2);
+  HOST DEVICE extern inline glm::vec3 bounce(const Material mat, const glm::vec3 ro, const glm::vec3 nor, const glm::vec3 randvec);
 
 //---------------------------------------------------------
 // Function Implementation
@@ -54,13 +55,31 @@ namespace Material {
     return r0 + (1.0-r0) * x*x*x*x*x;
   }
 
-  glm::vec3 refract(const glm::vec3 nor, const glm::vec3 inc, const float n1, const float n2) {
-    float n = n1/n2;
-    float cosI = -glm::dot(nor, inc);
-    float sinT2 = n*n*(1.0-cosI*cosI);
-    if (sinT2 > 1.0) return glm::vec3(0.0);
-    float cosT = glm::sqrt(1.0-sinT2);
-    return n*inc + (n*cosI-cosT)*nor;
+  glm::vec3 bounce(const Material mat, const glm::vec3 ro, const glm::vec3 nor, const glm::vec3 randvec) {
+    if (mat.m_type == DIFF) {
+      return Utils::randVectorHem(randvec.x,randvec.y,nor);
+    }
+    else if (mat.m_type == MIRR) {
+      return glm::reflect(ro, nor);
+    }
+    else if (mat.m_type == TRANS) {
+      float n1 = 1.0f;
+      float n2 = mat.m_n;
+      glm::vec3 nnor = nor;
+      // if coming from inside
+      if (glm::dot(ro,nnor) > 0.0f) {
+        float temp = n1;
+        n1 = n2;
+        n2 = temp;
+        nnor = -nnor;
+      }
+        
+      float refl = reflectance(nnor, ro, n1, n2);
+      if (randvec.x < refl)
+        return glm::reflect(ro, nnor);
+      else
+        return glm::refract(ro, nnor, n1/n2);
+    }
   }
 
 }
