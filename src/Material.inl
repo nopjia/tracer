@@ -41,7 +41,7 @@ namespace Material {
 // Function Implementation
 //---------------------------------------------------------
 
-  float reflectance(const glm::vec3& nor, const glm::vec3& inc, const float n1, const float n2) {
+  float reflectance(const glm::vec3& inc, const glm::vec3& nor, const float n1, const float n2) {
     float r0 = (n1-n2)/(n1+n2);
     r0 *= r0;
     float cosI = -glm::dot(nor, inc);
@@ -63,18 +63,23 @@ namespace Material {
       return glm::reflect(ro, nor);
     }
     else if (mat.m_type == TRANS) {
-      float n1 = 1.0f;
-      float n2 = mat.m_n;
-      glm::vec3 nnor = nor;
-      // if coming from inside
-      if (glm::dot(ro,nnor) > 0.0f) {
-        float temp = n1;
-        n1 = n2;
-        n2 = temp;
-        nnor = -nnor;
+      float n1, n2;
+      glm::vec3 nnor;      
+
+      // from outside
+      if (glm::dot(ro,nnor) < 0.0f) {        
+        n1 = 1.0f;
+        n2 = mat.m_n;
+        nnor = nor;
       }
-        
-      float refl = reflectance(nnor, ro, n1, n2);
+      // from inside transparent medium
+      else {
+        n1 = mat.m_n;
+        n2 = 1.0f;
+        nnor = -nor;
+      }
+      
+      float refl = reflectance(ro, nnor, n1, n2);
       if (randvec.x < refl)
         return glm::reflect(ro, nnor);
       else

@@ -13,12 +13,11 @@ film memory
 FIX NOW : BUG : ray intersection, distortion
 do Karl's 2 buffers - DOES NOT WORK
 spheres and cube
+fix fresnel - fresnel handles TIL - I think it works? low n
 
 -----
 
 color bleeding
-
-fix fresnel reflection / refraction
 
 focal blur - BAD random not on disk
 
