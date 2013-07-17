@@ -79,7 +79,8 @@ __global__ void initBuffersKernel(
   // focal blur
 #ifdef FOCAL_BLUR
   glm::vec3 fpt = focalDist*rays[idx].m_dir+rays[idx].m_pos;
-  rays[idx].m_pos += lensRadius*rand[idx];
+  glm::vec2 randdisk = lensRadius*Utils::randPointDisk(rand[idx].x,rand[idx].y,rand[idx].z);
+  rays[idx].m_pos += randdisk.x*glm::normalize(A) + randdisk.y*glm::normalize(B);
   rays[idx].m_dir = glm::normalize(fpt-rays[idx].m_pos);
 #endif
 

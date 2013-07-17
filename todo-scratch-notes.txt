@@ -22,7 +22,7 @@ color bleeding
 
 object picking / moving
 
-focal blur - BAD random not on disk
+focal blur - BAD random not on disk - seems to be more vertical
 
 normal un-transform incorrectly with non-uniform scaling?
 

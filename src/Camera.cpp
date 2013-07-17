@@ -14,7 +14,7 @@ m_aspect(1.0f),
 m_rotationAmount(0.005f),
 m_panAmount(0.04f),
 m_zoomAmount(0.05f),
-m_lensRadius(0.5f),
+m_lensRadius(1.0f),
 m_focalDist(5.0f)
 {
 }
