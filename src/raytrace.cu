@@ -128,11 +128,6 @@ __global__ void calcColorKernel(
   if (scene[hit.m_id].m_material.m_emit > 0.0f) {
     col[idx] *= scene[hit.m_id].m_material.m_color*scene[hit.m_id].m_material.m_emit;
     flags[idx] &= !THFL_PATH_RUN;
-
-    //if (depth >= 2) {
-    //  col[idx] = glm::vec3(0.0f, 1.0f, 0.0f);
-    //}
-
     return;
   }
 
@@ -149,6 +144,7 @@ __global__ void calcColorKernel(
   uint randidx = (idx + depth) % (w*h);
   rays[idx].m_dir = Material::bounce(scene[hit.m_id].m_material,
     rays[idx].m_dir, hit.m_nor, rand[randidx]);
+
   rays[idx].m_pos = hit.m_pos + EPS*rays[idx].m_dir;
 
 }

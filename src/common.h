@@ -40,7 +40,7 @@ typedef unsigned int uint;
 #define THFL_NONE       0x0000
 #define THFL_PATH_RUN   0x0001
 #define FOV 30
-#define PATH_DEPTH 3
+#define PATH_DEPTH 8
 
 // options
 #define TRI_NORM_INTERP
