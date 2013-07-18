@@ -217,6 +217,11 @@ namespace Ray {
               + tri.m_n[2]*bary.y;
 #endif
 
+#ifdef BACKFACE_CULL
+    if (glm::dot(ray.m_dir,hit.m_nor) > 0)
+      return Hit();
+#endif
+
     return hit;
   }
 }

@@ -242,6 +242,7 @@ void initScene() {
   Object::rotate(*obj, glm::angleAxis(90.0f, glm::vec3(0.0f, 0.0f, 1.0f)));
   Object::scale(*obj, BOX_HDIM*2.0f);
   Object::translate(*obj, glm::vec3(BOX_HDIM.x, 0.0f, 0.0f));
+  //obj->m_material.m_color = glm::vec3(0.5f, 1.0f, 0.5f);
   obj->m_material.m_color = glm::vec3(0.5f, 0.5f, 1.0f);
   scene.push_back(*obj);
   // left -x
@@ -261,17 +262,17 @@ void initScene() {
   scene.push_back(*obj);
 
   // 1
-  ////obj = Object::newObject(Mesh::loadObj("data/icosahedron.obj"));
-  ////obj = Object::newObject(Mesh::loadObj("data/unitcube.obj"));
+  obj = Object::newObject(Mesh::loadObj("data/icosahedron.obj"));
   //obj = Object::newObject(Mesh::newGeometry(Mesh::CUBE));
-  ////Object::scale(*obj, glm::vec3(4.0f,0.5f,4.0f));
-  //Object::scale(*obj, 3.0f);
-  //Object::rotate(*obj, glm::angleAxis(45.0f, glm::vec3(0.57735f)));  
-  //Object::translate(*obj, glm::vec3(0.0f, -2.0f, 0.0f));
-  //obj->m_material.m_color = glm::vec3(1.0f, 1.0f, 0.0f);
-  ////obj->m_material.m_type = Material::MIRR;
-  //obj->m_material.m_n = 1.4f;
-  //scene.push_back(*obj);
+  //Object::scale(*obj, glm::vec3(4.0f,0.5f,4.0f));
+  Object::scale(*obj, 2.0f);  
+  Object::rotate(*obj, glm::angleAxis(-10.0f, glm::vec3(1.0f, 0.0f, 0.0f)));
+  Object::rotate(*obj, glm::angleAxis(25.0f, glm::vec3(0.0f, 1.0f, 0.0f)));
+  Object::translate(*obj, glm::vec3(0.0f, -3.0f, 0.0f));
+  obj->m_material.m_color = glm::vec3(1.0f, 1.0f, 0.0f);
+  //obj->m_material.m_type = Material::TRANS;
+  obj->m_material.m_n = 1.8f;
+  scene.push_back(*obj);
 
   // 2
   //obj = Object::newObject(Mesh::newGeometry(Mesh::SPHERE));
@@ -290,21 +291,21 @@ void initScene() {
   //obj->m_material.m_n = 1.2f;
   //scene.push_back(*obj);
 
-  // 3
-  obj = Object::newObject(Mesh::newGeometry(Mesh::SPHERE));
-  Object::scale(*obj, 4.0f);
-  Object::translate(*obj, glm::vec3(-2.5f, -3.0f, -3.0f));
-  obj->m_material.m_color = glm::vec3(1.0f, 1.0f, 1.0f);
-  obj->m_material.m_type = Material::MIRR;
-  scene.push_back(*obj);
+  // CORNELL BOX SPHERES
+  //obj = Object::newObject(Mesh::newGeometry(Mesh::SPHERE));
+  //Object::scale(*obj, 4.0f);
+  //Object::translate(*obj, glm::vec3(-2.5f, -3.0f, -3.0f));
+  //obj->m_material.m_color = glm::vec3(1.0f, 1.0f, 1.0f);
+  //obj->m_material.m_type = Material::MIRR;
+  //scene.push_back(*obj);
 
-  obj = Object::newObject(Mesh::newGeometry(Mesh::SPHERE));
-  Object::scale(*obj, 4.0f);
-  Object::translate(*obj, glm::vec3(2.5f, -3.0f, 1.5f));
-  obj->m_material.m_color = glm::vec3(1.0f, 1.0f, 1.0f);
-  obj->m_material.m_type = Material::TRANS;
-  obj->m_material.m_n = 1.6f;
-  scene.push_back(*obj);
+  //obj = Object::newObject(Mesh::newGeometry(Mesh::SPHERE));
+  //Object::scale(*obj, 4.0f);
+  //Object::translate(*obj, glm::vec3(2.5f, -3.0f, 1.5f));
+  //obj->m_material.m_color = glm::vec3(1.0f, 1.0f, 1.0f);
+  //obj->m_material.m_type = Material::TRANS;
+  //obj->m_material.m_n = 1.6f;
+  //scene.push_back(*obj);
 
   //obj = Object::newObject(Mesh::loadObj("data/icosahedron.obj"));
   //Object::scale(*obj, 1.0f);
