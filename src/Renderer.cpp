@@ -181,6 +181,7 @@ void Renderer::render(const Camera& camera, float time) {
   }
   else if (mode == PATHTRACE) {
     ++filmIters;
+    //filmIters = 1;
 
     pathtrace(out_data, image_width, image_height, time,
       camera.getPosition(), A, B, C,

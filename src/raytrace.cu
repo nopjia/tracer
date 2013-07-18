@@ -24,7 +24,7 @@ __device__ int rgbToInt(glm::vec3 c)
   return (int(c.r*255.0)<<16) | (int(c.g*255.0)<<8) | int(c.b*255.0);
 }
 
-__global__ void testKernel(
+__global__ void raytraceKernel(
   const uint w, const uint h,
   const glm::vec3 campos, const glm::vec3 A, const glm::vec3 B, const glm::vec3 C,
   uint* pbo_out, 
@@ -49,8 +49,12 @@ __global__ void testKernel(
     col = ray.m_dir;
   }
   else {
-    col = scene[hit.m_id].m_material.m_color * scene[hit.m_id].m_material.m_brdf;
-    col *= glm::max(glm::dot(lightDir,hit.m_nor),0.0f);
+    if (scene[hit.m_id].m_material.m_emit > 0.0f)
+      col = scene[hit.m_id].m_material.m_color;
+    else {
+      col = scene[hit.m_id].m_material.m_color * scene[hit.m_id].m_material.m_brdf;
+      col *= glm::max(glm::dot(lightDir,hit.m_nor),0.0f);
+    }
   }
 
   pbo_out[idx] = rgbToInt(col);
@@ -100,7 +104,7 @@ __global__ void calcColorKernel(
   uint* flags,
   Ray::Ray* rays,
   glm::vec3* col,
-  const uint depth)
+  const int depth)
 {
 
   uint x = blockIdx.x*blockDim.x + threadIdx.x;
@@ -115,29 +119,38 @@ __global__ void calcColorKernel(
   
   // intersects nothing, kill path
   if( hit.m_id < 0 ) {
-    col[idx] = glm::vec3(0.0f);
+    col[idx] = glm::vec3(0.0f, 0.0f, 0.0f);   // BLACK
     flags[idx] &= !THFL_PATH_RUN;
     return;
   }
-  
+
   // intersects light, kill path
   if (scene[hit.m_id].m_material.m_emit > 0.0f) {
     col[idx] *= scene[hit.m_id].m_material.m_color*scene[hit.m_id].m_material.m_emit;
     flags[idx] &= !THFL_PATH_RUN;
-  }
-  else {    
-    // at max depth, no light, does not contribute color
-    if (depth == PATH_DEPTH-1) {
-      col[idx] = glm::vec3(0.0f);
-      return;
-    }
 
-    col[idx] *= scene[hit.m_id].m_material.m_color;// * scene[hit.m_id].m_material.m_brdf;
+    //if (depth >= 2) {
+    //  col[idx] = glm::vec3(0.0f, 1.0f, 0.0f);
+    //}
 
-    rays[idx].m_dir = Material::bounce(scene[hit.m_id].m_material,
-      rays[idx].m_dir, hit.m_nor, rand[idx]);
-    rays[idx].m_pos = hit.m_pos + EPS*rays[idx].m_dir;
+    return;
   }
+
+  // at max depth, not seen light, does not contribute color
+  if (depth == PATH_DEPTH-1) {
+    col[idx] = glm::vec3(0.0f, 0.0f, 0.0f);   // BLACK
+    return;
+  }
+
+  // else, compute color, bounce
+
+  col[idx] *= scene[hit.m_id].m_material.m_color;
+
+  uint randidx = (idx + depth) % (w*h);
+  rays[idx].m_dir = Material::bounce(scene[hit.m_id].m_material,
+    rays[idx].m_dir, hit.m_nor, rand[randidx]);
+  rays[idx].m_pos = hit.m_pos + EPS*rays[idx].m_dir;
+
 }
 
 __global__ void accumColorKernel(
@@ -212,5 +225,5 @@ void raytrace1(
 {
   dim3 block(BLOCK_SIZE,BLOCK_SIZE);
 	dim3 grid(w/block.x,h/block.y);
-  testKernel<<<grid, block>>>(w,h,campos,A,B,C,pbo_out,scene_d,sceneSize);
+  raytraceKernel<<<grid, block>>>(w,h,campos,A,B,C,pbo_out,scene_d,sceneSize);
 }

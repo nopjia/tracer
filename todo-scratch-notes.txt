@@ -13,16 +13,23 @@ film memory
 FIX NOW : BUG : ray intersection, distortion
 do Karl's 2 buffers - DOES NOT WORK
 spheres and cube
-fix fresnel - fresnel handles TIL - I think it works? low n
 jitter within pixel - already did that
 
 -----
 
 color bleeding
+- there are depth 2 paths
+  - has not hit light before (at d=1)
+- no depth 2 paths end at light
 
 object picking / moving
 
-focal blur - BAD random not on disk - seems to be more vertical
+focal blur - seems to be more vertical
+- when swap A and B result different
+
+fix fresnel for cubes
+- EPS problem?
+- ray bounce double intersect? store prim/face ID?
 
 normal un-transform incorrectly with non-uniform scaling?
 

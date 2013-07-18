@@ -199,7 +199,7 @@ void motion(int x, int y) {
 void initScene() {  
   camera.setFOV(FOV);
   camera.setAspect(WINDOW_W, WINDOW_H);
-  camera.zoom(-10.0f);
+  camera.zoom(-12.0f);
   camera.m_focalDist = 10.0f;
   camera.update();
   
@@ -221,7 +221,7 @@ void initScene() {
   Object::scale(*obj, BOX_HDIM*2.0f);
   Object::translate(*obj, glm::vec3(0.0f, BOX_HDIM.y, 0.0f));
   obj->m_material.m_color = glm::vec3(1.0f, 1.0f, 1.0f);
-  obj->m_material.m_emit = 2.0f;
+  //obj->m_material.m_emit = 1.0f;
   scene.push_back(*obj);
   // back -z
   obj = Object::newObject(planemesh);
@@ -230,7 +230,7 @@ void initScene() {
   Object::translate(*obj, glm::vec3(0.0f, 0.0f, -BOX_HDIM.z));
   obj->m_material.m_color = glm::vec3(1.0f);
   scene.push_back(*obj);
-  // front +z
+  //// front +z
   //obj = Object::newObject(planemesh);
   //Object::rotate(*obj, glm::angleAxis(-90.0f, glm::vec3(1.0f, 0.0f, 0.0f)));
   //Object::scale(*obj, BOX_HDIM*2.0f);
@@ -242,36 +242,36 @@ void initScene() {
   Object::rotate(*obj, glm::angleAxis(90.0f, glm::vec3(0.0f, 0.0f, 1.0f)));
   Object::scale(*obj, BOX_HDIM*2.0f);
   Object::translate(*obj, glm::vec3(BOX_HDIM.x, 0.0f, 0.0f));
-  obj->m_material.m_color = glm::vec3(0.0f, 0.0f, 1.0f);
+  obj->m_material.m_color = glm::vec3(0.5f, 0.5f, 1.0f);
   scene.push_back(*obj);
   // left -x
   obj = Object::newObject(planemesh);
   Object::rotate(*obj, glm::angleAxis(-90.0f, glm::vec3(0.0f, 0.0f, 1.0f)));
   Object::scale(*obj, BOX_HDIM*2.0f);
   Object::translate(*obj, glm::vec3(-BOX_HDIM.x, 0.0f, 0.0f));
-  obj->m_material.m_color = glm::vec3(1.0f, 0.0f, 0.0f);
+  obj->m_material.m_color = glm::vec3(1.0f, 0.5f, 0.5f);
   scene.push_back(*obj);
   
-  //// ceiling light
-  //obj = Object::newObject(Mesh::newGeometry(Mesh::CUBE));
-  //Object::scale(*obj, glm::vec3(BOX_HDIM.x, 1.0f, BOX_HDIM.z));
-  //Object::translate(*obj, glm::vec3(0.0f, BOX_HDIM.y, 0.0f));
-  //obj->m_material.m_color = glm::vec3(1.0f, 1.0f, 1.0f);
-  //obj->m_material.m_emit = 5.0f;
-  //scene.push_back(*obj);
+  // ceiling light
+  obj = Object::newObject(Mesh::newGeometry(Mesh::CUBE));
+  Object::scale(*obj, glm::vec3(BOX_HDIM.x, 1.0f, BOX_HDIM.z));
+  Object::translate(*obj, glm::vec3(0.0f, BOX_HDIM.y, 0.0f));
+  obj->m_material.m_color = glm::vec3(1.0f, 1.0f, 1.0f);
+  obj->m_material.m_emit = 2.0f;
+  scene.push_back(*obj);
 
   // 1
-  ////obj = Object::newObject(Mesh::loadObj("data/icosahedron.obj"));
-  ////obj = Object::newObject(Mesh::loadObj("data/unitcube.obj"));
-  //obj = Object::newObject(Mesh::newGeometry(Mesh::CUBE));
-  ////Object::scale(*obj, glm::vec3(4.0f,4.0f,1.0f));
-  ////Object::scale(*obj, 3.0f);
-  ////Object::translate(*obj, glm::vec3(0.0f, -3.0f, 0.0f));
-  ////Object::rotate(*obj, glm::angleAxis(30.0f, glm::vec3(0.57735f)));
-  //obj->m_material.m_color = glm::vec3(1.0f, 1.0f, 0.8f);
-  //obj->m_material.m_type = Material::TRANS;
-  //obj->m_material.m_n = 1.4f;
-  //scene.push_back(*obj);
+  //obj = Object::newObject(Mesh::loadObj("data/icosahedron.obj"));
+  //obj = Object::newObject(Mesh::loadObj("data/unitcube.obj"));
+  obj = Object::newObject(Mesh::newGeometry(Mesh::CUBE));
+  //Object::scale(*obj, glm::vec3(4.0f,0.5f,4.0f));
+  Object::scale(*obj, 3.0f);
+  Object::rotate(*obj, glm::angleAxis(45.0f, glm::vec3(0.57735f)));  
+  Object::translate(*obj, glm::vec3(0.0f, -2.0f, 0.0f));
+  obj->m_material.m_color = glm::vec3(1.0f, 1.0f, 0.0f);
+  //obj->m_material.m_type = Material::MIRR;
+  obj->m_material.m_n = 1.4f;
+  scene.push_back(*obj);
 
   // 2
   //obj = Object::newObject(Mesh::newGeometry(Mesh::SPHERE));
@@ -313,9 +313,9 @@ void initScene() {
   //obj->m_material.m_n = 1.8f;
   //scene.push_back(*obj);
 
-  obj = Object::newObject(Mesh::newGeometry(Mesh::CUBE));
-  Object::scale(*obj, 1.5f);
-  Object::translate(*obj, glm::vec3(0.0f, 0.0f, -3.0f));
-  obj->m_material.m_color = glm::vec3(1.0f, 0.3f, 1.0f);
-  scene.push_back(*obj);
+  //obj = Object::newObject(Mesh::newGeometry(Mesh::CUBE));
+  //Object::scale(*obj, 1.5f);
+  //Object::translate(*obj, glm::vec3(0.0f, 0.0f, -3.0f));
+  //obj->m_material.m_color = glm::vec3(1.0f, 0.3f, 1.0f);
+  //scene.push_back(*obj);
 }

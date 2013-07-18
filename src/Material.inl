@@ -78,7 +78,7 @@ namespace Material {
       glm::vec3 nnor;      
 
       // from outside
-      if (glm::dot(rd,nor) < 0.0f) {        
+      if (glm::dot(rd,nor) < 0.0f) {
         n1 = 1.0f;
         n2 = mat.m_n;
         nnor = nor;
