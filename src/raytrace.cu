@@ -2,7 +2,6 @@
 #include <curand.h>
 #include <thrust/device_vector.h>
 #include <thrust/sequence.h>
-#include <thrust/copy.h>
 #include <thrust/count.h>
 #include <glm/glm.hpp>
 #include "common.h"
@@ -69,7 +68,7 @@ __global__ void initBuffersKernel(
   const glm::vec3 campos, const glm::vec3 A, const glm::vec3 B, const glm::vec3 C,
   const float lensRadius, const float focalDist,
   glm::vec3* rand,
-  Ray::Ray* rays, glm::vec3* col, 
+  Ray::Ray* rays, glm::vec3* col, int* indices,
   glm::vec3* film, uint filmIters)
 {
   uint idx = blockIdx.x*blockDim.x + threadIdx.x;
@@ -95,6 +94,8 @@ __global__ void initBuffersKernel(
   // reset buffers
   col[idx] = glm::vec3(1.0f);
 
+  indices[idx] = idx;
+
   if (filmIters==1)
     film[idx] = glm::vec3(0.0f);
 }
@@ -109,6 +110,10 @@ __global__ void calcColorKernel(
   const int depth)
 {
   uint idx = blockIdx.x*blockDim.x + threadIdx.x;
+
+  // bounds check
+  if (idx >= size)
+    return;
 
   // indicate terminate path
   if (indices[idx] == -1)
@@ -150,12 +155,69 @@ __global__ void calcColorKernel(
 
 }
 
+template <typename T>
+struct path_end : public thrust::unary_function<T,bool>
+{
+  __host__ __device__
+  bool operator()(T x)
+  {
+    return x == -1;
+  }
+};
+
+__global__ void compactKernel(
+  const uint size,
+  int* indices,
+  Ray::Ray* rays,
+  glm::vec3* col
+  )
+{
+  uint glid = blockIdx.x*blockDim.x + threadIdx.x;
+  uint thid = threadIdx.x;
+
+  // stencil 
+  __shared__ int stencil[BLOCK_SIZE];
+  stencil[thid] = indices[glid]==-1 ? 1 : 0;
+
+  // scatter array
+  __shared__ int addr[BLOCK_SIZE];
+  addr[thid] = stencil[thid];
+  __syncthreads();
+  // inclusive scan
+  for (uint offset=1; offset<size; offset*=2)
+    if (thid >= offset)
+      addr[thid] = addr[thid] + addr[thid-offset];
+    __syncthreads();
+  // convert to exclusive/shift right
+  addr[thid] = thid==0 ? 0 : addr[thid-1];
+  __syncthreads();
+
+  // write out temp
+  __shared__ int indices_out[BLOCK_SIZE];
+  __shared__ Ray::Ray rays_out[BLOCK_SIZE];
+  __shared__ glm::vec3 col_out[BLOCK_SIZE];
+  if (thid<size && stencil[thid]==1) {
+    indices_out[addr[thid]] = indices[glid];
+    rays_out[addr[thid]] = rays[glid];
+    col_out[addr[thid]] = col[glid];
+  }
+  __syncthreads();
+
+  // out
+  indices[glid] = indices_out[thid];
+  rays[glid] = rays_out[thid];
+  col[glid] = col_out[thid];
+}
+
 __global__ void accumColorKernel(
   uint* pbo_out,
   glm::vec3* col,
   glm::vec3* film, const float filmIters)
 {
   uint idx = blockIdx.x*blockDim.x + threadIdx.x;
+
+  //// scatter write
+  //film[indices[idx]] += col[idx];
 
   film[idx] += col[idx];
 
@@ -176,16 +238,6 @@ __global__ void testRand(
   pbo_out[i] = rgbToInt(rand[i]);
 }
 
-template <typename T>
-struct path_end : public thrust::unary_function<T,bool>
-{
-    __host__ __device__
-    bool operator()(T x)
-    {
-        return x == -1;
-    }
-};
-
 extern "C"
 void pathtrace(
   uint* pbo_out, const uint w, const uint h, const float time,
@@ -195,6 +247,7 @@ void pathtrace(
   glm::vec3* rand_d,
   Ray::Ray* rays_d,
   glm::vec3* col_d,
+  int* idx_d,
   glm::vec3* film_d, const uint filmIters)
 {
   uint pixSize = w*h;
@@ -211,7 +264,7 @@ void pathtrace(
   // INIT BUFFERS
 
   initBuffersKernel<<<gridSize, blockSize>>>(
-    w,h,campos,A,B,C,lensRadius,focalDist,rand_d,rays_d,col_d,film_d,filmIters
+    w,h,campos,A,B,C,lensRadius,focalDist,rand_d,rays_d,col_d,idx_d,film_d,filmIters
   );
 
 
@@ -219,25 +272,44 @@ void pathtrace(
 
   // first time
 
-  thrust::device_vector<int> indices(pixSize);
-  thrust::sequence(indices.begin(), indices.end());
-
   calcColorKernel<<<gridSize, blockSize>>>(
-    pixSize,time,scene_d,sceneSize,rand_d,rays_d,col_d,indices.data().get(),0
+    pixSize,time,scene_d,sceneSize,rand_d,rays_d,col_d,idx_d,0
   );
 
+  uint newSize = pixSize;
+
   for (int i=1; i<PATH_DEPTH; ++i) {
+    //// get compacted size
+    //newSize = thrust::count_if(idx_d, idx_d+newSize, path_end<int>());
+    //
+    //uint newGridSize = newSize/blockSize + (newSize%blockSize==0 ? 0:1);
+
+    //// compact buffers
+    //compactKernel<<<newGridSize, blockSize>>>(
+    //  pixSize,// not pixSize
+    //  idx_d,
+    //  rays_d,
+    //  col_d
+    //);
+
+    // path trace with temp compacted buffers
     calcColorKernel<<<gridSize, blockSize>>>(
-      pixSize,time,scene_d,sceneSize,rand_d,rays_d,col_d,indices.data().get(),i
+      newSize,time,scene_d,sceneSize,rand_d,
+      rays_d,
+      col_d,
+      idx_d,
+      i
     );
   }
 
-
   // ACCUM OUTPUT
 
-  accumColorKernel<<<gridSize, blockSize>>>(pbo_out,col_d,film_d,filmIters);
+  accumColorKernel<<<gridSize, blockSize>>>(
+    pbo_out,col_d,film_d,filmIters);
 
   //testRand<<<gridSize, blockSize>>>(pbo_out,rand_d);
+
+  //cudaFree(idx_d);
 }
 
 extern "C"

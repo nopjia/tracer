@@ -42,6 +42,7 @@ private:
   glm::vec3* col_d;
   glm::vec3* film_d;
   glm::vec3* rand_d;
+  int* idx_d;
 
   uint sceneSize;
   uint filmIters;

@@ -13,6 +13,7 @@ void pathtrace(
   glm::vec3* rand_d,
   Ray::Ray* rays_d,
   glm::vec3* col_d,
+  int* idx_d,
   glm::vec3* film_d, const uint filmIters);
 
 extern "C"
@@ -28,7 +29,7 @@ void raytrace1(
 
 Renderer::Renderer(uint w, uint h) : 
   filmIters(0),
-  mode(RAYTRACE)
+  mode(PATHTRACE)
 {
   image_width = w;
   image_height = h;
@@ -95,6 +96,7 @@ void Renderer::initCUDAMemory() {
   cudaMalloc(&col_d, image_width*image_height*sizeof(glm::vec3));
   cudaMalloc(&film_d, image_width*image_height*sizeof(glm::vec3));
   cudaMalloc(&rand_d, image_width*image_height*sizeof(glm::vec3));
+  cudaMalloc(&idx_d, image_width*image_height*sizeof(int));
 }
 
 void Renderer::freeCUDAMemory() {
@@ -102,6 +104,7 @@ void Renderer::freeCUDAMemory() {
   cudaFree(col_d);
   cudaFree(film_d);
   cudaFree(rand_d);
+  cudaFree(idx_d);
   
   // TODO: free scene_d
 }
@@ -184,7 +187,7 @@ void Renderer::render(const Camera& camera, float time) {
       camera.getPosition(), A, B, C,
       camera.m_lensRadius, camera.m_focalDist,
       scene_d, sceneSize,
-      rand_d, rays_d, col_d,
+      rand_d, rays_d, col_d, idx_d,
       film_d, filmIters);
   }
 
