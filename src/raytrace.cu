@@ -1,4 +1,6 @@
 #include <cuda_runtime.h>
+#include <thrust/device_vector.h>
+#include <thrust/copy.h>
 #include <curand.h>
 #include <glm/glm.hpp>
 #include "common.h"
@@ -64,7 +66,7 @@ __global__ void initBuffersKernel(
   const uint w, const uint h,
   const glm::vec3 campos, const glm::vec3 A, const glm::vec3 B, const glm::vec3 C,
   const float lensRadius, const float focalDist,
-  glm::vec3* rand, uint* flags,
+  glm::vec3* rand,
   Ray::Ray* rays, glm::vec3* col, 
   glm::vec3* film, uint filmIters)
 {
@@ -93,15 +95,12 @@ __global__ void initBuffersKernel(
 
   if (filmIters==1)
     film[idx] = glm::vec3(0.0f);
-
-  flags[idx] = THFL_NONE | THFL_PATH_RUN;
 }
 
 __global__ void calcColorKernel(
   const uint w, const uint h, const float time,
   const Object::Object* scene, const uint sceneSize,
   glm::vec3* rand,
-  uint* flags,
   Ray::Ray* rays,
   glm::vec3* col,
   const int depth)
@@ -111,7 +110,10 @@ __global__ void calcColorKernel(
   uint y = blockIdx.y*blockDim.y + threadIdx.y;
   uint idx = y*w + x;
 
-  if (!flags[idx]&THFL_PATH_RUN)
+  const glm::vec3 ZERO_VEC3(0.0f);
+
+  // indicate terminate path
+  if (rays[idx].m_dir == ZERO_VEC3)
     return;
 
   // intersection test
@@ -119,21 +121,21 @@ __global__ void calcColorKernel(
   
   // intersects nothing, kill path
   if( hit.m_id < 0 ) {
-    col[idx] = glm::vec3(0.0f, 0.0f, 0.0f);   // BLACK
-    flags[idx] &= !THFL_PATH_RUN;
+    col[idx] = ZERO_VEC3;   // BLACK
+    rays[idx].m_dir = ZERO_VEC3;
     return;
   }
 
   // intersects light, kill path
   if (scene[hit.m_id].m_material.m_emit > 0.0f) {
     col[idx] *= scene[hit.m_id].m_material.m_color*scene[hit.m_id].m_material.m_emit;
-    flags[idx] &= !THFL_PATH_RUN;
+    rays[idx].m_dir = ZERO_VEC3;
     return;
   }
 
   // at max depth, not seen light, does not contribute color
   if (depth == PATH_DEPTH-1) {
-    col[idx] = glm::vec3(0.0f, 0.0f, 0.0f);   // BLACK
+    col[idx] = ZERO_VEC3;   // BLACK
     return;
   }
 
@@ -141,6 +143,7 @@ __global__ void calcColorKernel(
 
   col[idx] *= scene[hit.m_id].m_material.m_color;
 
+  // cycle thru rand array with depth
   uint randidx = (idx + depth) % (w*h);
   rays[idx].m_dir = Material::bounce(scene[hit.m_id].m_material,
     rays[idx].m_dir, hit.m_nor, rand[randidx]);
@@ -188,7 +191,6 @@ void pathtrace(
   const float lensRadius, const float focalDist,
   const Object::Object* scene_d, const uint sceneSize,
   glm::vec3* rand_d,
-  uint* flags_d,
   Ray::Ray* rays_d,
   glm::vec3* col_d,
   glm::vec3* film_d, const uint filmIters)
@@ -202,12 +204,16 @@ void pathtrace(
 	dim3 grid(w/block.x, h/block.y);
 
   initBuffersKernel<<<grid, block>>>(
-    w,h,campos,A,B,C,lensRadius,focalDist,rand_d,flags_d,rays_d,col_d,film_d,filmIters
+    w,h,campos,A,B,C,lensRadius,focalDist,rand_d,rays_d,col_d,film_d,filmIters
   );
-  for (int i=0; i<PATH_DEPTH; ++i)
+
+
+  for (int i=1; i<PATH_DEPTH; ++i) {
     calcColorKernel<<<grid, block>>>(
-      w,h,time,scene_d,sceneSize,rand_d,flags_d,rays_d,col_d,i
+      w,h,time,scene_d,sceneSize,rand_d,rays_d,col_d,i
     );
+  }
+
   accumColorKernel<<<grid, block>>>(w,h,pbo_out,col_d,film_d,filmIters);
 
   //testRand<<<grid, block>>>(w,h,pbo_out,rand_d);

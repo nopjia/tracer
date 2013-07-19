@@ -11,7 +11,6 @@ void pathtrace(
   const float lensRadius, const float focalDist,
   const Object::Object* scene_d, const uint sceneSize,
   glm::vec3* rand_d,
-  uint* flags_d,
   Ray::Ray* rays_d,
   glm::vec3* col_d,
   glm::vec3* film_d, const uint filmIters);
@@ -96,7 +95,6 @@ void Renderer::initCUDAMemory() {
   cudaMalloc(&col_d, image_width*image_height*sizeof(glm::vec3));
   cudaMalloc(&film_d, image_width*image_height*sizeof(glm::vec3));
   cudaMalloc(&rand_d, image_width*image_height*sizeof(glm::vec3));
-  cudaMalloc(&flags_d, image_width*image_height*sizeof(uint));
 }
 
 void Renderer::freeCUDAMemory() {
@@ -104,7 +102,6 @@ void Renderer::freeCUDAMemory() {
   cudaFree(col_d);
   cudaFree(film_d);
   cudaFree(rand_d);
-  cudaFree(flags_d);
   
   // TODO: free scene_d
 }
@@ -187,7 +184,7 @@ void Renderer::render(const Camera& camera, float time) {
       camera.getPosition(), A, B, C,
       camera.m_lensRadius, camera.m_focalDist,
       scene_d, sceneSize,
-      rand_d, flags_d, rays_d, col_d,
+      rand_d, rays_d, col_d,
       film_d, filmIters);
   }
 

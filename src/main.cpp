@@ -262,8 +262,8 @@ void initScene() {
   scene.push_back(*obj);
 
   // 1
-  obj = Object::newObject(Mesh::loadObj("data/icosahedron.obj"));
-  //obj = Object::newObject(Mesh::newGeometry(Mesh::CUBE));
+  //obj = Object::newObject(Mesh::loadObj("data/icosahedron.obj"));
+  obj = Object::newObject(Mesh::newGeometry(Mesh::CUBE));
   //Object::scale(*obj, glm::vec3(4.0f,0.5f,4.0f));
   Object::scale(*obj, 2.0f);  
   Object::rotate(*obj, glm::angleAxis(-10.0f, glm::vec3(1.0f, 0.0f, 0.0f)));
