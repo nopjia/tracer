@@ -151,86 +151,23 @@ __global__ void calcColorKernel(
     rays[idx].m_dir, hit.m_nor, rand[randidx]);
 
   rays[idx].m_pos = hit.m_pos + EPS*rays[idx].m_dir;
-
-}
-
-template <typename T>
-struct path_alive : public thrust::unary_function<T,bool>
-{
-  __host__ __device__
-  bool operator()(T x)
-  {
-    return x >= 0;
-  }
-};
-
-__global__ void compactKernel(
-  const uint size,
-  int* indices,
-  Ray::Ray* rays,
-  glm::vec3* col
-  )
-{
-  uint glid = blockIdx.x*blockDim.x + threadIdx.x;
-  uint thid = threadIdx.x;
-
-  // stencil 
-  __shared__ int stencil[BLOCK_SIZE];
-  stencil[thid] = indices[glid]>=0 ? 1 : 0;
-
-  // scatter array
-  __shared__ int addr[BLOCK_SIZE];
-  addr[thid] = stencil[thid];
-  __syncthreads();
-  // inclusive scan
-  for (uint offset=1; offset<size; offset*=2)
-    if (thid >= offset)
-      addr[thid] = addr[thid] + addr[thid-offset];
-    __syncthreads();
-  // convert to exclusive/shift right
-  addr[thid] = thid==0 ? 0 : addr[thid-1];
-  __syncthreads();
-
-  // write out temp
-  __shared__ int indices_out[BLOCK_SIZE];
-  __shared__ Ray::Ray rays_out[BLOCK_SIZE];
-  __shared__ glm::vec3 col_out[BLOCK_SIZE];
-  if (glid<size && stencil[thid]==1) {
-    indices_out[addr[thid]] = indices[glid];
-    rays_out[addr[thid]] = rays[glid];
-    col_out[addr[thid]] = col[glid];
-  }
-  __syncthreads();
-
-  // out
-  indices[glid] = indices_out[thid];
-  rays[glid] = rays_out[thid];
-  col[glid] = col_out[thid];
 }
 
 __global__ void accumColorKernel(
   uint* pbo_out,
-  const uint size,
   int* indices,
   glm::vec3* col,
   glm::vec3* film, const float filmIters)
 {
   uint idx = blockIdx.x*blockDim.x + threadIdx.x;
 
-#ifndef STREAM_COMPACT
   film[idx] += col[idx];
-#else
-  // scatter write
-  if (indices[idx]>=0 && idx < size)
-    film[indices[idx]] += col[idx];
-#endif
 
 #ifdef GAMMA_CORRECT
   pbo_out[idx] = rgbToInt( glm::pow(film[idx]/filmIters, glm::vec3(1.0f/2.2f)) );
 #else
   pbo_out[idx] = rgbToInt(film[idx]/filmIters);
 #endif
-  //pbo_out[idx] = rgbToInt(col[idx]);
 }
 
 __global__ void testRand(
@@ -258,91 +195,27 @@ void pathtrace(
 
   curandGenerator_t gen;
   curandCreateGenerator(&gen, CURAND_RNG_PSEUDO_DEFAULT);
-  curandSetPseudoRandomGeneratorSeed(gen, 100.0f);
+  curandSetPseudoRandomGeneratorSeed(gen, time*100.0f);
   curandGenerateUniform(gen, (float*)rand_d, 3*pixSize);
   
   uint blockSize = BLOCK_SIZE;
   uint gridSize = pixSize/blockSize + (pixSize%blockSize==0 ? 0:1);
-
-
+  
   // INIT BUFFERS
-
   initBuffersKernel<<<gridSize, blockSize>>>(
     w,h,campos,A,B,C,lensRadius,focalDist,rand_d,rays_d,col_d,idx_d,film_d,filmIters
   );
-
-
+  
   // PATH TRACE
-#ifndef STREAM_COMPACT
   for (int i=1; i<PATH_DEPTH; ++i) {
     calcColorKernel<<<gridSize, blockSize>>>(
       pixSize,time,scene_d,sceneSize,rand_d,rays_d,col_d,idx_d,i
     );
   }
-#else
-  // first time
-  calcColorKernel<<<gridSize, blockSize>>>(
-    pixSize,time,scene_d,sceneSize,rand_d,rays_d,col_d,idx_d,0
-  );
-
-  uint prevGridSize = gridSize;
-  uint prevSize = pixSize;
-
-  thrust::device_ptr<int> idx_ptr(idx_d);
-  thrust::device_ptr<Ray::Ray> rays_ptr(rays_d);
-  thrust::device_ptr<glm::vec3> col_ptr(col_d);
-
-  for (int i=1; i<2; ++i) {
-    // get compacted size
-    uint currSize = thrust::count_if(
-      idx_ptr, idx_ptr+prevSize,
-      path_alive<int>());
-    
-    uint currGridSize = currSize/blockSize + (currSize%blockSize==0 ? 0:1);
-
-    //// compact buffers
-    //compactKernel<<<prevGridSize, blockSize>>>(
-    //  prevSize,
-    //  idx_d,
-    //  rays_d,
-    //  col_d
-    //);
-
-    // compact buffers
-    thrust::copy_if(
-      rays_ptr, rays_ptr+prevSize, idx_ptr, rays_ptr, 
-      path_alive<int>());
-    thrust::copy_if(
-      col_ptr, col_ptr+prevSize, idx_ptr, col_ptr, 
-      path_alive<int>());
-    thrust::copy_if(
-      idx_ptr, idx_ptr+prevSize, idx_ptr,
-      path_alive<int>());
-
-    //// path trace with temp compacted buffers
-    //calcColorKernel<<<currGridSize, blockSize>>>(
-    //  currSize,time,scene_d,sceneSize,rand_d,
-    //  rays_d,
-    //  col_d,
-    //  idx_d,
-    //  i
-    //);
-
-    prevSize = currSize;
-    prevGridSize = currGridSize;
-  }
-#endif
 
   // ACCUM OUTPUT
-
-  // MISSING: write non-compacted to col
-  // need another col_out buffer, pre film
   accumColorKernel<<<gridSize, blockSize>>>(
-    pbo_out,prevSize,idx_d,col_d,film_d,filmIters);
-
-  //testRand<<<gridSize, blockSize>>>(pbo_out,rand_d);
-
-  //cudaFree(idx_d);
+    pbo_out,idx_d,col_d,film_d,filmIters);
 }
 
 extern "C"
