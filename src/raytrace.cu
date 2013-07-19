@@ -1,8 +1,7 @@
 #include <cuda_runtime.h>
 #include <curand.h>
-#include <thrust/device_vector.h>
-#include <thrust/sequence.h>
 #include <thrust/count.h>
+#include <thrust/copy.h>
 #include <glm/glm.hpp>
 #include "common.h"
 #include "Object.inl"
@@ -156,12 +155,12 @@ __global__ void calcColorKernel(
 }
 
 template <typename T>
-struct path_end : public thrust::unary_function<T,bool>
+struct path_alive : public thrust::unary_function<T,bool>
 {
   __host__ __device__
   bool operator()(T x)
   {
-    return x == -1;
+    return x >= 0;
   }
 };
 
@@ -177,7 +176,7 @@ __global__ void compactKernel(
 
   // stencil 
   __shared__ int stencil[BLOCK_SIZE];
-  stencil[thid] = indices[glid]==-1 ? 1 : 0;
+  stencil[thid] = indices[glid]>=0 ? 1 : 0;
 
   // scatter array
   __shared__ int addr[BLOCK_SIZE];
@@ -196,7 +195,7 @@ __global__ void compactKernel(
   __shared__ int indices_out[BLOCK_SIZE];
   __shared__ Ray::Ray rays_out[BLOCK_SIZE];
   __shared__ glm::vec3 col_out[BLOCK_SIZE];
-  if (thid<size && stencil[thid]==1) {
+  if (glid<size && stencil[thid]==1) {
     indices_out[addr[thid]] = indices[glid];
     rays_out[addr[thid]] = rays[glid];
     col_out[addr[thid]] = col[glid];
@@ -211,15 +210,19 @@ __global__ void compactKernel(
 
 __global__ void accumColorKernel(
   uint* pbo_out,
+  int* indices,
   glm::vec3* col,
   glm::vec3* film, const float filmIters)
 {
   uint idx = blockIdx.x*blockDim.x + threadIdx.x;
 
-  //// scatter write
-  //film[indices[idx]] += col[idx];
-
+#ifndef STREAM_COMPACT
   film[idx] += col[idx];
+#else
+  // scatter write
+  //film[idx] += col[idx];
+  film[indices[idx]] += col[idx];
+#endif
 
 #ifdef GAMMA_CORRECT
   pbo_out[idx] = rgbToInt( glm::pow(film[idx]/filmIters, glm::vec3(1.0f/2.2f)) );
@@ -269,43 +272,72 @@ void pathtrace(
 
 
   // PATH TRACE
-
+#ifndef STREAM_COMPACT
+  for (int i=1; i<PATH_DEPTH; ++i) {
+    calcColorKernel<<<gridSize, blockSize>>>(
+      pixSize,time,scene_d,sceneSize,rand_d,rays_d,col_d,idx_d,i
+    );
+  }
+#else
   // first time
-
   calcColorKernel<<<gridSize, blockSize>>>(
     pixSize,time,scene_d,sceneSize,rand_d,rays_d,col_d,idx_d,0
   );
 
-  uint newSize = pixSize;
+  uint prevGridSize = gridSize;
+  uint prevSize = pixSize;
+  uint currSize = 0;  
+
+  thrust::device_ptr<int> idx_ptr(idx_d);
+  thrust::device_ptr<Ray::Ray> rays_ptr(rays_d);
+  thrust::device_ptr<glm::vec3> col_ptr(col_d);
 
   for (int i=1; i<PATH_DEPTH; ++i) {
-    //// get compacted size
-    //newSize = thrust::count_if(idx_d, idx_d+newSize, path_end<int>());
-    //
-    //uint newGridSize = newSize/blockSize + (newSize%blockSize==0 ? 0:1);
+    // get compacted size
+    currSize = thrust::count_if(
+      thrust::device_ptr<int>(idx_d), 
+      thrust::device_ptr<int>(idx_d+prevSize),
+      path_alive<int>());
+    
+    uint currGridSize = currSize/blockSize + (currSize%blockSize==0 ? 0:1);
 
     //// compact buffers
-    //compactKernel<<<newGridSize, blockSize>>>(
-    //  pixSize,// not pixSize
+    //compactKernel<<<prevGridSize, blockSize>>>(
+    //  prevSize,
     //  idx_d,
     //  rays_d,
     //  col_d
     //);
 
+    // compact buffers
+    thrust::copy_if(
+      rays_ptr, rays_ptr+prevSize, idx_ptr, rays_ptr, 
+      path_alive<int>());
+    thrust::copy_if(
+      col_ptr, col_ptr+prevSize, idx_ptr, col_ptr, 
+      path_alive<int>());
+    thrust::copy_if(
+      idx_ptr, idx_ptr+prevSize, idx_ptr,
+      path_alive<int>());
+
     // path trace with temp compacted buffers
-    calcColorKernel<<<gridSize, blockSize>>>(
-      newSize,time,scene_d,sceneSize,rand_d,
+    calcColorKernel<<<currGridSize, blockSize>>>(
+      pixSize,time,scene_d,sceneSize,rand_d,
       rays_d,
       col_d,
       idx_d,
       i
     );
+
+    prevSize = currSize;
+    prevGridSize = currGridSize;
   }
+#endif
 
   // ACCUM OUTPUT
 
   accumColorKernel<<<gridSize, blockSize>>>(
-    pbo_out,col_d,film_d,filmIters);
+    pbo_out,idx_d,col_d,film_d,filmIters);
 
   //testRand<<<gridSize, blockSize>>>(pbo_out,rand_d);
 

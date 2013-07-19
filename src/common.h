@@ -45,6 +45,7 @@ typedef unsigned int uint;
 #define GAMMA_CORRECT
 //#define FOCAL_BLUR
 #define BACKFACE_CULL
+#define STREAM_COMPACT
 
 
 //---------------------------------------------------------

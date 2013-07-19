@@ -22,6 +22,8 @@ color bleeding
 
 -----
 
+stream compaction?
+
 object picking / moving
 
 focal blur - seems to be more vertical

@@ -29,7 +29,7 @@ void raytrace1(
 
 Renderer::Renderer(uint w, uint h) : 
   filmIters(0),
-  mode(PATHTRACE)
+  mode(RAYTRACE)
 {
   image_width = w;
   image_height = h;
@@ -181,7 +181,7 @@ void Renderer::render(const Camera& camera, float time) {
   }
   else if (mode == PATHTRACE) {
     ++filmIters;
-    //filmIters = 1;
+    filmIters = 1;
 
     pathtrace(out_data, image_width, image_height, time,
       camera.getPosition(), A, B, C,
