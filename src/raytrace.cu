@@ -220,7 +220,6 @@ __global__ void accumColorKernel(
   film[idx] += col[idx];
 #else
   // scatter write
-  //film[idx] += col[idx];
   film[indices[idx]] += col[idx];
 #endif
 
@@ -322,7 +321,7 @@ void pathtrace(
 
     // path trace with temp compacted buffers
     calcColorKernel<<<currGridSize, blockSize>>>(
-      pixSize,time,scene_d,sceneSize,rand_d,
+      currSize,time,scene_d,sceneSize,rand_d,
       rays_d,
       col_d,
       idx_d,
