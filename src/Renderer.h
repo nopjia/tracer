@@ -18,6 +18,8 @@ public:
   void init();
   void initScene(Object::Object* scene, uint size);
   void render(const Camera& camera, float time);
+
+  void updateScene(int index, const Object::Object& obj);
   void setMode(Mode m);
   void resetFilm();
   uint getIterations();  
@@ -43,7 +45,10 @@ private:
   glm::vec3* film_d;
   glm::vec3* rand_d;
   int* idx_d;
-
+  
+  // cuda inbetween buffers
+  Object::Object* scene_hd;
+  
   uint sceneSize;
   uint filmIters;
   Mode mode;

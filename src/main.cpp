@@ -19,6 +19,7 @@ namespace {
   Renderer renderer(WINDOW_W/PIXSCALE, WINDOW_H/PIXSCALE);
 
   std::vector<Object::Object> scene;
+  int clickedObjID = -1;
 }
 
 void initGL();
@@ -154,13 +155,44 @@ void keyboard(unsigned char key, int x, int y) {
 }
 
 void mouse(int button, int state, int x, int y) {
-  printf("click %x\n", button);
+  //printf("click %x\n", button);
 
   // set/clear bits
   if (state == GLUT_DOWN) {
     mouseButtons |= 0x1 << button;
   } else if (state == GLUT_UP) {
     mouseButtons &= ~(0x1 << button);
+  }
+
+  // pick
+  if (state == GLUT_DOWN &&
+    glutGetModifiers()==GLUT_ACTIVE_CTRL) {
+    Ray::Ray ray;
+    {
+      glm::vec3 A,B,C;
+
+      // camera ray
+      C = glm::normalize(camera.getLookAt()-camera.getPosition());
+      A = glm::normalize(glm::cross(C,camera.getUp()));
+      B = 1.0f/camera.getAspect()*glm::normalize(glm::cross(A,C));
+
+      // scale by FOV
+      float tanFOV = tan(glm::radians(camera.getFOV()));
+      A *= tanFOV;
+      B *= tanFOV;
+
+      glm::vec2 uv( (float)x/WINDOW_W, (float)(WINDOW_H-y)/WINDOW_H );
+
+      ray.m_pos = camera.getPosition()+C + (2.0f*uv.x-1.0f)*A + (2.0f*uv.y-1.0f)*B;
+      ray.m_dir = glm::normalize(ray.m_pos-camera.getPosition());
+    }
+
+    Ray::Hit hit = Ray::intersectScene(ray, scene.data(), scene.size());
+    if (hit.m_id >= 0) {
+      printf("clicked obj %i\n", hit.m_id);
+      clickedObjID = hit.m_id;
+    }
+
   }
 
   mouseX = x;
@@ -171,20 +203,51 @@ void motion(int x, int y) {
   float dx, dy;
   dx = (float)(x - mouseX);
   dy = (float)(y - mouseY);
-   
+  
   if (mouseButtons & 0x1) {
-    const float FACTOR = -0.05f;
-    camera.rotate(FACTOR*dx, FACTOR*dy);
+    if (glutGetModifiers()==GLUT_ACTIVE_CTRL) {
+      const float FACTOR = 0.025f;
+      glm::vec3& trans = 
+        FACTOR*dx * glm::normalize(glm::cross(camera.getLookAt()-camera.getPosition(), camera.getUp()))
+        - FACTOR*dy * camera.getUp();
+      Object::translate(scene[clickedObjID], trans);
+      renderer.updateScene(clickedObjID, scene[clickedObjID]);
+    }
+    else {
+      const float FACTOR = -0.05f;
+      camera.rotate(FACTOR*dx, FACTOR*dy);
+    }
+
     renderer.resetFilm();
   }
   else if (mouseButtons & 0x2) {
-    const float FACTOR = 0.05f;
-    camera.pan(-FACTOR*dx, FACTOR*dy);
+    if (glutGetModifiers()==GLUT_ACTIVE_CTRL) {
+      const float FACTOR = 1.0f;
+      glm::vec3& xAxis = glm::normalize(glm::cross(camera.getLookAt()-camera.getPosition(), camera.getUp()));
+      glm::vec3& yAxis = camera.getUp();
+      glm::quat rot = glm::angleAxis(FACTOR*dy, xAxis);
+      rot = rot * glm::angleAxis(FACTOR*dx, yAxis);
+      Object::rotateIsolate(scene[clickedObjID], rot);
+      renderer.updateScene(clickedObjID, scene[clickedObjID]);
+    }
+    else {
+      const float FACTOR = 0.05f;
+      camera.pan(-FACTOR*dx, FACTOR*dy);
+    }
+
     renderer.resetFilm();
   }
   else if (mouseButtons & 0x4) {
-    const float FACTOR = 0.05f;
-    camera.zoom(FACTOR*dy);
+    if (glutGetModifiers()==GLUT_ACTIVE_CTRL) {
+      const float FACTOR = 0.01f;
+      Object::scale(scene[clickedObjID], 1.0f+FACTOR*dy);
+      renderer.updateScene(clickedObjID, scene[clickedObjID]);
+    }
+    else {
+      const float FACTOR = 0.05f;
+      camera.zoom(FACTOR*dy);
+    }
+
     renderer.resetFilm();
   }
 
@@ -270,7 +333,7 @@ void initScene() {
   Object::rotate(*obj, glm::angleAxis(25.0f, glm::vec3(0.0f, 1.0f, 0.0f)));
   Object::translate(*obj, glm::vec3(0.0f, -3.0f, 0.0f));
   obj->m_material.m_color = glm::vec3(1.0f, 1.0f, 0.0f);
-  //obj->m_material.m_type = Material::TRANS;
+  obj->m_material.m_type = Material::TRANS;
   obj->m_material.m_n = 1.8f;
   scene.push_back(*obj);
 

@@ -33,6 +33,7 @@ namespace Object {
   HOST DEVICE extern inline glm::mat4 getModelMatrix(const Object& obj);
   HOST DEVICE extern inline void translate(Object& obj, const glm::vec3& amount);
   HOST DEVICE extern inline void rotate(Object& obj, const glm::quat& quaternion);
+  HOST DEVICE extern inline void rotateIsolate(Object& obj, const glm::quat& quaternion);
   HOST DEVICE extern inline void scale(Object& obj, const float amount);
   HOST DEVICE extern inline void scale(Object& obj, const glm::vec3& amount);
 
@@ -60,6 +61,20 @@ namespace Object {
   void rotate(Object& obj, const glm::quat& quaternion)
   {
     obj.m_matrix = glm::toMat4(quaternion) * obj.m_matrix;
+    UPDATE_MAT_I();
+  }
+
+  // ignores current translation
+  void rotateIsolate(Object& obj, const glm::quat& quaternion)
+  {
+    // store translation
+    glm::vec4 trans = obj.m_matrix[3];
+    // zero out translation
+    obj.m_matrix[3] = glm::vec4(0.0f);
+    // apply rotation
+    obj.m_matrix = glm::toMat4(quaternion) * obj.m_matrix;
+    // restore translation
+    obj.m_matrix[3] = trans;
     UPDATE_MAT_I();
   }
 

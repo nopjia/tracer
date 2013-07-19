@@ -114,7 +114,7 @@ void Renderer::initScene(Object::Object* scene, uint size) {
   size_t objectMemSize = sizeof(Object::Object);
 
   size_t sceneMemSize = size*objectMemSize;
-  Object::Object* scene_hd = (Object::Object*)malloc(sceneMemSize);
+  scene_hd = (Object::Object*)malloc(sceneMemSize);
 
   sceneSize = size;
 
@@ -147,7 +147,7 @@ void Renderer::initScene(Object::Object* scene, uint size) {
   cudaMalloc(&scene_d, sceneMemSize);
   cudaMemcpy(scene_d, scene_hd, sceneMemSize, cudaMemcpyHostToDevice);
 
-  free(scene_hd);
+  //free(scene_hd);
 }
 
 void Renderer::render(const Camera& camera, float time) {
@@ -216,4 +216,10 @@ uint Renderer::getIterations() {
 
 void Renderer::setMode(Mode m) {
   mode = m;
+}
+
+void Renderer::updateScene(int index, const Object::Object& obj) {
+  scene_hd[index].m_matrix = obj.m_matrix;
+  scene_hd[index].m_matrixi = obj.m_matrixi;
+  cudaMemcpy(scene_d, scene_hd, sceneSize*sizeof(Object::Object), cudaMemcpyHostToDevice);
 }
