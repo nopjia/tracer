@@ -1,7 +1,8 @@
 #include <cuda_runtime.h>
+#include <curand.h>
 #include <thrust/device_vector.h>
 #include <thrust/copy.h>
-#include <curand.h>
+#include <thrust/sequence.h>
 #include <glm/glm.hpp>
 #include "common.h"
 #include "Object.inl"
@@ -103,6 +104,7 @@ __global__ void calcColorKernel(
   glm::vec3* rand,
   Ray::Ray* rays,
   glm::vec3* col,
+  int* indices,
   const int depth)
 {
 
@@ -110,10 +112,8 @@ __global__ void calcColorKernel(
   uint y = blockIdx.y*blockDim.y + threadIdx.y;
   uint idx = y*w + x;
 
-  const glm::vec3 ZERO_VEC3(0.0f);
-
   // indicate terminate path
-  if (rays[idx].m_dir == ZERO_VEC3)
+  if (indices[idx] == -1)
     return;
 
   // intersection test
@@ -121,21 +121,21 @@ __global__ void calcColorKernel(
   
   // intersects nothing, kill path
   if( hit.m_id < 0 ) {
-    col[idx] = ZERO_VEC3;   // BLACK
-    rays[idx].m_dir = ZERO_VEC3;
+    col[idx] = glm::vec3(0.0f);   // BLACK
+    indices[idx] = -1;
     return;
   }
 
   // intersects light, kill path
   if (scene[hit.m_id].m_material.m_emit > 0.0f) {
     col[idx] *= scene[hit.m_id].m_material.m_color*scene[hit.m_id].m_material.m_emit;
-    rays[idx].m_dir = ZERO_VEC3;
+    indices[idx] = -1;
     return;
   }
 
   // at max depth, not seen light, does not contribute color
   if (depth == PATH_DEPTH-1) {
-    col[idx] = ZERO_VEC3;   // BLACK
+    col[idx] = glm::vec3(0.0f);   // BLACK
     return;
   }
 
@@ -203,16 +203,35 @@ void pathtrace(
   dim3 block(BLOCK_SIZE, BLOCK_SIZE);
 	dim3 grid(w/block.x, h/block.y);
 
+
+  // INIT BUFFERS
+
   initBuffersKernel<<<grid, block>>>(
     w,h,campos,A,B,C,lensRadius,focalDist,rand_d,rays_d,col_d,film_d,filmIters
   );
 
 
+  // PATH TRACE
+
+  // first time
+
+  thrust::device_vector<int> indices(w*h);
+  thrust::sequence(indices.begin(), indices.end());
+
+  calcColorKernel<<<grid, block>>>(
+    w,h,time,scene_d,sceneSize,rand_d,rays_d,col_d,indices.data().get(),0
+  );
+
   for (int i=1; i<PATH_DEPTH; ++i) {
+
+
     calcColorKernel<<<grid, block>>>(
-      w,h,time,scene_d,sceneSize,rand_d,rays_d,col_d,i
+      w,h,time,scene_d,sceneSize,rand_d,rays_d,col_d,indices.data().get(),i
     );
   }
+
+
+  // ACCUM OUTPUT
 
   accumColorKernel<<<grid, block>>>(w,h,pbo_out,col_d,film_d,filmIters);
 
