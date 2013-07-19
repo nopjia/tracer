@@ -38,7 +38,7 @@ typedef unsigned int uint;
 
 // rendering constants
 #define FOV 30
-#define PATH_DEPTH 8
+#define PATH_DEPTH 6
 
 // options
 #define TRI_NORM_INTERP

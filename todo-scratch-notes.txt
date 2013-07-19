@@ -23,6 +23,10 @@ object picking / moving
 
 -----
 
+over time performance worsens
+
+~9500 iterations, film dies, no more accum
+
 stream compaction?
 
 focal blur - seems to be more vertical
