@@ -34,7 +34,7 @@ typedef unsigned int uint;
 #define WINDOW_H    512
 #define PIXSCALE    2
 #define DELTA_T     0.01f
-#define BLOCK_SIZE  32
+#define BLOCK_SIZE  64
 
 // rendering constants
 #define FOV 30

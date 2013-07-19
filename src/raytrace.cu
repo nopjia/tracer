@@ -1,8 +1,9 @@
 #include <cuda_runtime.h>
 #include <curand.h>
 #include <thrust/device_vector.h>
-#include <thrust/copy.h>
 #include <thrust/sequence.h>
+#include <thrust/copy.h>
+#include <thrust/count.h>
 #include <glm/glm.hpp>
 #include "common.h"
 #include "Object.inl"
@@ -33,9 +34,9 @@ __global__ void raytraceKernel(
   uint* pbo_out, 
   const Object::Object* scene, const uint sceneSize)
 {
-  uint x = blockIdx.x*blockDim.x + threadIdx.x;
-  uint y = blockIdx.y*blockDim.y + threadIdx.y;
-  uint idx = y*w + x;
+  uint idx = blockIdx.x*blockDim.x + threadIdx.x;
+  uint x = idx % w;
+  uint y = idx / w;
 
   // calc camera rays
   glm::vec2 uv((float)x/w, (float)y/h);  
@@ -71,9 +72,9 @@ __global__ void initBuffersKernel(
   Ray::Ray* rays, glm::vec3* col, 
   glm::vec3* film, uint filmIters)
 {
-  uint x = blockIdx.x*blockDim.x + threadIdx.x;
-  uint y = blockIdx.y*blockDim.y + threadIdx.y;
-  uint idx = y*w + x;
+  uint idx = blockIdx.x*blockDim.x + threadIdx.x;
+  uint x = idx % w;
+  uint y = idx / w;
   
   // calc camera rays
   glm::vec2 uv(
@@ -99,7 +100,7 @@ __global__ void initBuffersKernel(
 }
 
 __global__ void calcColorKernel(
-  const uint w, const uint h, const float time,
+  const uint size, const float time,
   const Object::Object* scene, const uint sceneSize,
   glm::vec3* rand,
   Ray::Ray* rays,
@@ -107,10 +108,7 @@ __global__ void calcColorKernel(
   int* indices,
   const int depth)
 {
-
-  uint x = blockIdx.x*blockDim.x + threadIdx.x;
-  uint y = blockIdx.y*blockDim.y + threadIdx.y;
-  uint idx = y*w + x;
+  uint idx = blockIdx.x*blockDim.x + threadIdx.x;
 
   // indicate terminate path
   if (indices[idx] == -1)
@@ -144,7 +142,7 @@ __global__ void calcColorKernel(
   col[idx] *= scene[hit.m_id].m_material.m_color;
 
   // cycle thru rand array with depth
-  uint randidx = (idx + depth) % (w*h);
+  uint randidx = (idx + depth) % (size);
   rays[idx].m_dir = Material::bounce(scene[hit.m_id].m_material,
     rays[idx].m_dir, hit.m_nor, rand[randidx]);
 
@@ -153,14 +151,11 @@ __global__ void calcColorKernel(
 }
 
 __global__ void accumColorKernel(
-  const uint w, const uint h,
   uint* pbo_out,
   glm::vec3* col,
   glm::vec3* film, const float filmIters)
 {
-  uint x = blockIdx.x*blockDim.x + threadIdx.x;
-  uint y = blockIdx.y*blockDim.y + threadIdx.y;
-  uint idx = y*w + x;
+  uint idx = blockIdx.x*blockDim.x + threadIdx.x;
 
   film[idx] += col[idx];
 
@@ -173,16 +168,23 @@ __global__ void accumColorKernel(
 }
 
 __global__ void testRand(
-  const uint w, const uint h,
   uint* pbo_out,
   glm::vec3* rand
   )
 {
-  uint x = blockIdx.x*blockDim.x + threadIdx.x;
-  uint y = blockIdx.y*blockDim.y + threadIdx.y;
-  uint idx = y*w + x;
-  pbo_out[idx] = rgbToInt(rand[idx]);
+  uint i = blockIdx.x*blockDim.x + threadIdx.x;
+  pbo_out[i] = rgbToInt(rand[i]);
 }
+
+template <typename T>
+struct path_end : public thrust::unary_function<T,bool>
+{
+    __host__ __device__
+    bool operator()(T x)
+    {
+        return x == -1;
+    }
+};
 
 extern "C"
 void pathtrace(
@@ -195,18 +197,20 @@ void pathtrace(
   glm::vec3* col_d,
   glm::vec3* film_d, const uint filmIters)
 {
+  uint pixSize = w*h;
+
   curandGenerator_t gen;
   curandCreateGenerator(&gen, CURAND_RNG_PSEUDO_DEFAULT);
   curandSetPseudoRandomGeneratorSeed(gen, time*100.0f);
-  curandGenerateUniform(gen, (float*)rand_d, 3*w*h);
-
-  dim3 block(BLOCK_SIZE, BLOCK_SIZE);
-	dim3 grid(w/block.x, h/block.y);
+  curandGenerateUniform(gen, (float*)rand_d, 3*pixSize);
+  
+  uint blockSize = BLOCK_SIZE;
+  uint gridSize = pixSize/blockSize + (pixSize%blockSize==0 ? 0:1);
 
 
   // INIT BUFFERS
 
-  initBuffersKernel<<<grid, block>>>(
+  initBuffersKernel<<<gridSize, blockSize>>>(
     w,h,campos,A,B,C,lensRadius,focalDist,rand_d,rays_d,col_d,film_d,filmIters
   );
 
@@ -215,27 +219,25 @@ void pathtrace(
 
   // first time
 
-  thrust::device_vector<int> indices(w*h);
+  thrust::device_vector<int> indices(pixSize);
   thrust::sequence(indices.begin(), indices.end());
 
-  calcColorKernel<<<grid, block>>>(
-    w,h,time,scene_d,sceneSize,rand_d,rays_d,col_d,indices.data().get(),0
+  calcColorKernel<<<gridSize, blockSize>>>(
+    pixSize,time,scene_d,sceneSize,rand_d,rays_d,col_d,indices.data().get(),0
   );
 
   for (int i=1; i<PATH_DEPTH; ++i) {
-
-
-    calcColorKernel<<<grid, block>>>(
-      w,h,time,scene_d,sceneSize,rand_d,rays_d,col_d,indices.data().get(),i
+    calcColorKernel<<<gridSize, blockSize>>>(
+      pixSize,time,scene_d,sceneSize,rand_d,rays_d,col_d,indices.data().get(),i
     );
   }
 
 
   // ACCUM OUTPUT
 
-  accumColorKernel<<<grid, block>>>(w,h,pbo_out,col_d,film_d,filmIters);
+  accumColorKernel<<<gridSize, blockSize>>>(pbo_out,col_d,film_d,filmIters);
 
-  //testRand<<<grid, block>>>(w,h,pbo_out,rand_d);
+  //testRand<<<gridSize, blockSize>>>(pbo_out,rand_d);
 }
 
 extern "C"
@@ -244,7 +246,8 @@ void raytrace1(
   const glm::vec3& campos, const glm::vec3& A, const glm::vec3& B, const glm::vec3& C,
   const Object::Object* scene_d, const uint sceneSize)
 {
-  dim3 block(BLOCK_SIZE,BLOCK_SIZE);
-	dim3 grid(w/block.x,h/block.y);
-  raytraceKernel<<<grid, block>>>(w,h,campos,A,B,C,pbo_out,scene_d,sceneSize);
+  uint pixSize = w*h;
+  uint blockSize = BLOCK_SIZE;
+  uint gridSize = pixSize/blockSize + (pixSize%blockSize==0 ? 0:1);
+  raytraceKernel<<<gridSize,blockSize>>>(w,h,campos,A,B,C,pbo_out,scene_d,sceneSize);
 }
