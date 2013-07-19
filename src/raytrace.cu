@@ -210,6 +210,7 @@ __global__ void compactKernel(
 
 __global__ void accumColorKernel(
   uint* pbo_out,
+  const uint size,
   int* indices,
   glm::vec3* col,
   glm::vec3* film, const float filmIters)
@@ -220,7 +221,8 @@ __global__ void accumColorKernel(
   film[idx] += col[idx];
 #else
   // scatter write
-  film[indices[idx]] += col[idx];
+  if (indices[idx]>=0 && idx < size)
+    film[indices[idx]] += col[idx];
 #endif
 
 #ifdef GAMMA_CORRECT
@@ -256,7 +258,7 @@ void pathtrace(
 
   curandGenerator_t gen;
   curandCreateGenerator(&gen, CURAND_RNG_PSEUDO_DEFAULT);
-  curandSetPseudoRandomGeneratorSeed(gen, time*100.0f);
+  curandSetPseudoRandomGeneratorSeed(gen, 100.0f);
   curandGenerateUniform(gen, (float*)rand_d, 3*pixSize);
   
   uint blockSize = BLOCK_SIZE;
@@ -285,17 +287,15 @@ void pathtrace(
 
   uint prevGridSize = gridSize;
   uint prevSize = pixSize;
-  uint currSize = 0;  
 
   thrust::device_ptr<int> idx_ptr(idx_d);
   thrust::device_ptr<Ray::Ray> rays_ptr(rays_d);
   thrust::device_ptr<glm::vec3> col_ptr(col_d);
 
-  for (int i=1; i<PATH_DEPTH; ++i) {
+  for (int i=1; i<2; ++i) {
     // get compacted size
-    currSize = thrust::count_if(
-      thrust::device_ptr<int>(idx_d), 
-      thrust::device_ptr<int>(idx_d+prevSize),
+    uint currSize = thrust::count_if(
+      idx_ptr, idx_ptr+prevSize,
       path_alive<int>());
     
     uint currGridSize = currSize/blockSize + (currSize%blockSize==0 ? 0:1);
@@ -319,14 +319,14 @@ void pathtrace(
       idx_ptr, idx_ptr+prevSize, idx_ptr,
       path_alive<int>());
 
-    // path trace with temp compacted buffers
-    calcColorKernel<<<currGridSize, blockSize>>>(
-      currSize,time,scene_d,sceneSize,rand_d,
-      rays_d,
-      col_d,
-      idx_d,
-      i
-    );
+    //// path trace with temp compacted buffers
+    //calcColorKernel<<<currGridSize, blockSize>>>(
+    //  currSize,time,scene_d,sceneSize,rand_d,
+    //  rays_d,
+    //  col_d,
+    //  idx_d,
+    //  i
+    //);
 
     prevSize = currSize;
     prevGridSize = currGridSize;
@@ -335,8 +335,10 @@ void pathtrace(
 
   // ACCUM OUTPUT
 
+  // MISSING: write non-compacted to col
+  // need another col_out buffer, pre film
   accumColorKernel<<<gridSize, blockSize>>>(
-    pbo_out,idx_d,col_d,film_d,filmIters);
+    pbo_out,prevSize,idx_d,col_d,film_d,filmIters);
 
   //testRand<<<gridSize, blockSize>>>(pbo_out,rand_d);
 
