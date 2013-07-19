@@ -221,5 +221,5 @@ void Renderer::setMode(Mode m) {
 void Renderer::updateScene(int index, const Object::Object& obj) {
   scene_hd[index].m_matrix = obj.m_matrix;
   scene_hd[index].m_matrixi = obj.m_matrixi;
-  cudaMemcpy(scene_d, scene_hd, sceneSize*sizeof(Object::Object), cudaMemcpyHostToDevice);
+  cudaMemcpy(scene_d+index, scene_hd+index, sizeof(Object::Object), cudaMemcpyHostToDevice);
 }

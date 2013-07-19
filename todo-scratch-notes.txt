@@ -19,12 +19,11 @@ color bleeding
   - has not hit light before (at d=1)
 - no depth 2 paths end at light
 - fixed with rand index cycling
+object picking / moving
 
 -----
 
 stream compaction?
-
-object picking / moving
 
 focal blur - seems to be more vertical
 - when swap A and B result different
