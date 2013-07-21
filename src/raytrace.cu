@@ -102,11 +102,6 @@ __global__ void initBuffersKernel(
 
   if (filmIters==1)
     film[idx] = glm::vec3(0.0f);
-
-  // testrand
-  //col[idx] = glm::vec3(0.0f);
-  //if (glm::distance(randdisk, (uv-0.5f)*4.0f) < 0.1f)
-  //  film[idx] += glm::vec3(1.0f);
 }
 
 __global__ void calcColorKernel(
@@ -171,9 +166,6 @@ __global__ void accumColorKernel(
   glm::vec3* film, const float filmIters)
 {
   uint idx = blockIdx.x*blockDim.x + threadIdx.x;
-
-  //pbo_out[idx] = rgbToInt(film[idx]);
-  //return;
 
   film[idx] += col[idx];
 

@@ -275,7 +275,7 @@ void initScene() {
   camera.setFOV(FOV);
   camera.setAspect(WINDOW_W, WINDOW_H);
   camera.zoom(-13.0f);
-  camera.m_focalDist = 10.0f;
+  camera.m_focalDist = 13.0f;
   camera.update();
   
   const glm::vec3 BOX_HDIM (5.0f);
