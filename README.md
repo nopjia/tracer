@@ -4,6 +4,8 @@ Interactive real-time iterative path tracer in CUDA.
 
 Advanced Rendering Seminar, University of Pennsylvania, Spring 2013
 
+Links: [Images](https://www.dropbox.com/sh/s84z7zrgsmnzt5p/IUVtvwegdP#/), [Video](http://www.youtube.com/watch?v=mbpqxlJHaBE)
+
 ![render](http://i.imgur.com/PWYqm0M.png)
 
 ## Features
@@ -60,19 +62,13 @@ In addition, there is a fast visualization mode for quickly viewing the scene be
 ## Performance
 
 Hardware:
-Intel Core i7 2.40GHz 8.00GB RAM
-NVIDIA GeForce GT 650M
+Intel Core i7 2.40GHz, 8.00GB RAM, NVIDIA GeForce GT 650M
 
 At 256x256 buffer size:
 ~20fps. Approximately converges at ~400 iterations, ~20 seconds.
 
 At 512x512 buffer size:
 ~10fps. Approximately converges at ~300 iterations, ~30 seconds.
-
-## Media
-
-[Images](https://www.dropbox.com/sh/s84z7zrgsmnzt5p/IUVtvwegdP#/)
-[Video](http://www.youtube.com/watch?v=mbpqxlJHaBE)
 
 ## References
 
