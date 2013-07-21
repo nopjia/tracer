@@ -55,7 +55,17 @@ Stream compaction was attempted in order discard dead paths and minimize thread 
 
 In addition, there is a fast visualization mode for quickly viewing the scene before path tracing. Instead of OpenGL draw, it uses single bounce ray tracing on CUDA, in order to ensure exact image pixel correspondence with path tracing.
 
-Runs at ~20fps on GeForce GT 650M. Achieves considerably converged image at ~300 iterations, after ~15 seconds.
+## Performance
+
+Hardware:
+Intel Core i7 2.40GHz 8.00GB RAM
+NVIDIA GeForce GT 650M
+
+At 256x256 buffer size:
+~20fps. Approximately converges at ~400 iterations, ~20 seconds.
+
+At 512x512 buffer size:
+~10fps. Approximately converges at ~300 iterations, ~30 seconds.
 
 ## Media
 

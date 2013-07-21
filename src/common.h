@@ -32,7 +32,7 @@ typedef unsigned int uint;
 
 #define WINDOW_W    512
 #define WINDOW_H    512
-#define PIXSCALE    1
+#define PIXSCALE    2
 #define DELTA_T     0.01f
 #define BLOCK_SIZE  64
 
@@ -44,7 +44,7 @@ typedef unsigned int uint;
 #define TRI_NORM_INTERP
 #define GAMMA_CORRECT
 #define PIX_JITTER
-//#define FOCAL_BLUR
+#define FOCAL_BLUR
 #define BACKFACE_CULL
 
 
