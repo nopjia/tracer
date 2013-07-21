@@ -72,6 +72,7 @@ At 512x512 buffer size:
 ## Media
 
 [Images](https://www.dropbox.com/sh/s84z7zrgsmnzt5p/IUVtvwegdP#/)
+[Video](http://www.youtube.com/watch?v=mbpqxlJHaBE)
 
 ## References
 
