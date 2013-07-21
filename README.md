@@ -1,5 +1,7 @@
 # CUDA Path Tracer
 
+Interactive real-time iterative path tracer in CUDA.
+
 Advanced Rendering Seminar, University of Pennsylvania, Spring 2013
 
 ## Features
@@ -41,15 +43,21 @@ Object Manipulation
 
 ## Details
 
-Real-time iterative path tracer in CUDA.
+Interactive real-time iterative path tracer in CUDA.
 
 Image draw done through CUDA OpenGL Interop, by mapping OpenGL pixel buffer object to CUDA memory, then drawing the pixel buffer out as a texture on a full screen quad.
 
-Path tracing kernel is a per-bounce structure, instead of a mega-kernel structure, in order to minimize thread divergence.
+Path tracing kernel is a per-bounce structure, instead of a mega-kernel structure, in order to minimize thread divergence. 
 
-In addition, there is a fast visualization mode, done using simple single bounce ray tracing and arbitrary Blinn-Phong lighting.
+Stream compaction was attempted in order discard dead paths and minimize thread workload. However, the overhead costs and memory coherency issues turned out to negatively affect performance. (If interested, see commit 9df5f0df5b0878ef1253b34402f037b2977c55ed.)
+
+In addition, there is a fast visualization mode for quickly viewing the scene before path tracing. Instead of OpenGL draw, it uses single bounce ray tracing on CUDA, in order to ensure exact image pixel correspondence with path tracing.
 
 Runs at ~20fps on GeForce GT 650M. Achieves considerably converged image at ~900 iterations, after ~45 seconds.
+
+## Media
+
+[Images](https://www.dropbox.com/sh/s84z7zrgsmnzt5p/IUVtvwegdP#/)
 
 ## References
 
