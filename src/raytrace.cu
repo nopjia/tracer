@@ -75,17 +75,23 @@ __global__ void initBuffersKernel(
   uint y = idx / w;
   
   // calc camera rays
+#ifndef PIX_JITTER
+  glm::vec2 uv( (float)x/w, (float)y/h );
+#else
   glm::vec2 uv(
     (float)x/w + (2.0f*rand[idx].x-1.0f)/w, 
     (float)y/h + (2.0f*rand[idx].y-1.0f)/h
   );
+#endif
+
   rays[idx].m_pos = campos+C + (2.0f*uv.x-1.0f)*A + (2.0f*uv.y-1.0f)*B;
   rays[idx].m_dir = glm::normalize(rays[idx].m_pos-campos);
 
   // focal blur
 #ifdef FOCAL_BLUR
   glm::vec3 fpt = focalDist*rays[idx].m_dir+rays[idx].m_pos;
-  glm::vec2 randdisk = lensRadius*Utils::randPointDisk(rand[idx].x,rand[idx].y,rand[idx].z);
+  //glm::vec2 randdisk = lensRadius*Utils::randPointDisk(rand[idx].x,rand[idx].y,rand[idx].z);
+  glm::vec2 randdisk = lensRadius*glm::vec2(rand[idx])*2.0f - 1.0f;
   rays[idx].m_pos += randdisk.x*glm::normalize(A) + randdisk.y*glm::normalize(B);
   rays[idx].m_dir = glm::normalize(fpt-rays[idx].m_pos);
 #endif
@@ -100,7 +106,7 @@ __global__ void initBuffersKernel(
 }
 
 __global__ void calcColorKernel(
-  const uint size, const float time,
+  const uint size,
   const Object::Object* scene, const uint sceneSize,
   glm::vec3* rand,
   Ray::Ray* rays,
@@ -175,8 +181,9 @@ __global__ void testRand(
   glm::vec3* rand
   )
 {
-  uint i = blockIdx.x*blockDim.x + threadIdx.x;
-  pbo_out[i] = rgbToInt(rand[i]);
+  uint idx = blockIdx.x*blockDim.x + threadIdx.x;
+
+  pbo_out[idx] = rgbToInt(rand[idx]);
 }
 
 extern "C"
@@ -207,9 +214,9 @@ void pathtrace(
   );
   
   // PATH TRACE
-  for (int i=1; i<PATH_DEPTH; ++i) {
+  for (int i=0; i<PATH_DEPTH; ++i) {
     calcColorKernel<<<gridSize, blockSize>>>(
-      pixSize,time,scene_d,sceneSize,rand_d,rays_d,col_d,idx_d,i
+      pixSize,scene_d,sceneSize,rand_d,rays_d,col_d,idx_d,i
     );
   }
 

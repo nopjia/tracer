@@ -263,7 +263,7 @@ void initScene() {
   camera.setFOV(FOV);
   camera.setAspect(WINDOW_W, WINDOW_H);
   camera.zoom(-13.0f);
-  camera.m_focalDist = 10.0f;
+  camera.m_focalDist = 6.0f;
   camera.update();
   
   const glm::vec3 BOX_HDIM (5.0f);
@@ -325,17 +325,17 @@ void initScene() {
   scene.push_back(*obj);
 
   // 1
-  ////obj = Object::newObject(Mesh::loadObj("data/icosahedron.obj"));
-  //obj = Object::newObject(Mesh::newGeometry(Mesh::CUBE));
-  ////Object::scale(*obj, glm::vec3(4.0f,0.5f,4.0f));
-  //Object::scale(*obj, 2.0f);  
+  //obj = Object::newObject(Mesh::loadObj("data/icosahedron.obj"));
+  obj = Object::newObject(Mesh::newGeometry(Mesh::CUBE));
+  //Object::scale(*obj, glm::vec3(4.0f,0.5f,4.0f));
+  Object::scale(*obj, 2.0f);  
   //Object::rotate(*obj, glm::angleAxis(-10.0f, glm::vec3(1.0f, 0.0f, 0.0f)));
   //Object::rotate(*obj, glm::angleAxis(25.0f, glm::vec3(0.0f, 1.0f, 0.0f)));
   //Object::translate(*obj, glm::vec3(0.0f, -3.0f, 0.0f));
-  //obj->m_material.m_color = glm::vec3(1.0f, 1.0f, 0.0f);
+  obj->m_material.m_color = glm::vec3(1.0f, 1.0f, 0.0f);
   //obj->m_material.m_type = Material::TRANS;
-  //obj->m_material.m_n = 1.8f;
-  //scene.push_back(*obj);
+  obj->m_material.m_n = 1.8f;
+  scene.push_back(*obj);
 
   // 2
   //obj = Object::newObject(Mesh::newGeometry(Mesh::SPHERE));
@@ -355,20 +355,20 @@ void initScene() {
   //scene.push_back(*obj);
 
   // CORNELL BOX SPHERES
-  obj = Object::newObject(Mesh::newGeometry(Mesh::SPHERE));
-  Object::scale(*obj, 4.0f);
-  Object::translate(*obj, glm::vec3(-2.5f, -3.0f, -3.0f));
-  obj->m_material.m_color = glm::vec3(1.0f, 1.0f, 1.0f);
-  obj->m_material.m_type = Material::MIRR;
-  scene.push_back(*obj);
+  //obj = Object::newObject(Mesh::newGeometry(Mesh::SPHERE));
+  //Object::scale(*obj, 4.0f);
+  //Object::translate(*obj, glm::vec3(-2.5f, -3.0f, -3.0f));
+  //obj->m_material.m_color = glm::vec3(1.0f, 1.0f, 1.0f);
+  //obj->m_material.m_type = Material::MIRR;
+  //scene.push_back(*obj);
 
-  obj = Object::newObject(Mesh::newGeometry(Mesh::SPHERE));
-  Object::scale(*obj, 4.0f);
-  Object::translate(*obj, glm::vec3(2.5f, -3.0f, 1.5f));
-  obj->m_material.m_color = glm::vec3(1.0f, 1.0f, 1.0f);
-  obj->m_material.m_type = Material::TRANS;
-  obj->m_material.m_n = 1.6f;
-  scene.push_back(*obj);
+  //obj = Object::newObject(Mesh::newGeometry(Mesh::SPHERE));
+  //Object::scale(*obj, 4.0f);
+  //Object::translate(*obj, glm::vec3(2.5f, -3.0f, 1.5f));
+  //obj->m_material.m_color = glm::vec3(1.0f, 1.0f, 1.0f);
+  //obj->m_material.m_type = Material::TRANS;
+  //obj->m_material.m_n = 1.6f;
+  //scene.push_back(*obj);
 
   //obj = Object::newObject(Mesh::loadObj("data/icosahedron.obj"));
   //Object::scale(*obj, 1.0f);
