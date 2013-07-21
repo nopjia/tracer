@@ -2,31 +2,21 @@
 
 Advanced Rendering Seminar, University of Pennsylvania, Spring 2013
 
-## Details
-
-Real-time iterative path tracer implemented on CUDA.
-
-Path tracing kernel is a per-bounce structure, instead of a mega-kernel structure, in order to minimize thread divergence.
-
-Image draw done through CUDA OpenGL Interop, by mapping OpenGL pixel buffer object to CUDA memory, then drawing the pixel buffer out as a texture on a full screen quad.
-
-Runs at ~20fps on GeForce GT 650M. Achieves considerably converged image at ~1000 iterations, after ~50 seconds.
-
 ## Features
 
 - Diffuse Shading
 - Diffuse Reflection
 - Specular Reflection
-- Fresnel Refraction
+- Fresnel Reflection and Refraction
 - Anti-aliasing
 - *Interactive* Depth of Field
 - *Interactive* Camera
 - *Interactive* Object Manipulation
 
+Two visualization modes:
 
-- Two visualization modes:
-    - Mode 1: fast single bounce ray tracing (default at startup)
-    - Mode 2: path tracing
+1. Fast single bounce ray tracing (default at startup)
+1. Path tracing
 
 ## Controls
 
@@ -48,6 +38,16 @@ Object Manipulation
 - **Translate** - Ctrl + Left Click +  drag
 - **Scale** - Ctrl + Right Click +  drag
 - **Rotate** - Ctrl + Middle Click +  drag
+
+## Details
+
+Real-time iterative path tracer CUDA.
+
+Image draw done through CUDA OpenGL Interop, by mapping OpenGL pixel buffer object to CUDA memory, then drawing the pixel buffer out as a texture on a full screen quad.
+
+Path tracing kernel is a per-bounce structure, instead of a mega-kernel structure, in order to minimize thread divergence.
+
+Runs at ~20fps on GeForce GT 650M. Achieves considerably converged image at ~900 iterations, after ~45 seconds.
 
 ## References
 
