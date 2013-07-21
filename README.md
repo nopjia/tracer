@@ -4,6 +4,8 @@ Interactive real-time iterative path tracer in CUDA.
 
 Advanced Rendering Seminar, University of Pennsylvania, Spring 2013
 
+![render](https://photos-1.dropbox.com/t/0/AACdWxeqFN2jJNrI21odXSl9qw5B3WFONW1oIP_eEKH6sQ/12/5058905/jpeg/2048x1536/3/1374397200/0/2/tracer%202013-07-21%2014-53-21-02.bmp/mI2kCnCJANTnk8by_DXcOj2aTXSe1hmOYvFezyry5mQ)
+
 ## Features
 
 - Diffuse Shading
@@ -49,11 +51,11 @@ Image draw done through CUDA OpenGL Interop, by mapping OpenGL pixel buffer obje
 
 Path tracing kernel is a per-bounce structure, instead of a mega-kernel structure, in order to minimize thread divergence. 
 
-Stream compaction was attempted in order discard dead paths and minimize thread workload. However, the overhead costs and memory coherency issues turned out to negatively affect performance. (If interested, see commit 9df5f0df5b0878ef1253b34402f037b2977c55ed.)
+Stream compaction was attempted in order discard dead paths and minimize thread workload. However, the overhead costs and memory coherency issues turned out to negatively affect performance. (If interested, see corresponding [commit](https://github.com/nopjia/tracer/commit/9df5f0df5b0878ef1253b34402f037b2977c55ed).)
 
 In addition, there is a fast visualization mode for quickly viewing the scene before path tracing. Instead of OpenGL draw, it uses single bounce ray tracing on CUDA, in order to ensure exact image pixel correspondence with path tracing.
 
-Runs at ~20fps on GeForce GT 650M. Achieves considerably converged image at ~900 iterations, after ~45 seconds.
+Runs at ~20fps on GeForce GT 650M. Achieves considerably converged image at ~300 iterations, after ~15 seconds.
 
 ## Media
 
