@@ -384,11 +384,13 @@ void initScene() {
   obj->m_material.m_n = 1.6f;
   scene.push_back(*obj);
 
-  //obj = Object::newObject(Mesh::loadObj("data/icosahedron.obj"));
-  obj = Object::newObject(Mesh::newGeometry(Mesh::CUBE));
-  Object::scale(*obj, 2.0f);
+  obj = Object::newObject(Mesh::loadObj("data/icosahedron.obj"));
+  //obj = Object::newObject(Mesh::newGeometry(Mesh::CUBE));
+  Object::scale(*obj, 1.5f);
   //Object::rotate(*obj, glm::angleAxis(45.0f, glm::vec3(0.57735f)));
-  Object::translate(*obj, glm::vec3(-1.0f, -4.0f, 3.0f));
+  Object::rotate(*obj, glm::angleAxis(-10.0f, glm::vec3(1.0f, 0.0f, 0.0f)));
+  Object::rotate(*obj, glm::angleAxis(25.0f, glm::vec3(0.0f, 1.0f, 0.0f)));
+  Object::translate(*obj, glm::vec3(-1.0f, -3.7f, 3.0f));
   obj->m_material.m_color = glm::vec3(1.0f, 1.0f, 0.0f);
   scene.push_back(*obj);
 }
