@@ -4,7 +4,7 @@ Interactive real-time iterative path tracer in CUDA.
 
 Advanced Rendering Seminar, University of Pennsylvania, Spring 2013
 
-![render](https://photos-1.dropbox.com/t/0/AACdWxeqFN2jJNrI21odXSl9qw5B3WFONW1oIP_eEKH6sQ/12/5058905/jpeg/2048x1536/3/1374397200/0/2/tracer%202013-07-21%2014-53-21-02.bmp/mI2kCnCJANTnk8by_DXcOj2aTXSe1hmOYvFezyry5mQ)
+![render](http://i.imgur.com/PWYqm0M.png)
 
 ## Features
 
