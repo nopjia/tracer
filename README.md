@@ -29,3 +29,13 @@ Object Manipulation
 * **Translate** - Ctrl + Left Click +  drag
 * **Scale** - Ctrl + Right Click +  drag
 * **Rotate** - Ctrl + Middle Click +  drag
+
+## References
+
+* [Matt Pharr, Physically Based Rendering](http://www.pbrt.org/)
+* [smallpt: Global Illumination in 99 lines of C++](http://www.kevinbeason.com/smallpt/)
+* [A Raytracer in C++](http://www.codermind.com/articles/Raytracer-in-C++-Introduction-What-is-ray-tracing.html)
+* [Reflections and Refractions in Ray Tracing](http://graphics.stanford.edu/courses/cs148-10-summer/docs/2006--degreve--reflection_refraction.pdf)
+
+---
+Nop Jiarathanakul
