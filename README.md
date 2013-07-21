@@ -53,6 +53,8 @@ Path tracing kernel is a per-bounce structure, instead of a mega-kernel structur
 
 Stream compaction was attempted in order discard dead paths and minimize thread workload. However, the overhead costs and memory coherency issues turned out to negatively affect performance. (If interested, see corresponding [commit](https://github.com/nopjia/tracer/commit/9df5f0df5b0878ef1253b34402f037b2977c55ed).)
 
+Cornell Box scene description is hard-coded, but the renderer supports .obj files, with normals, and does soft normal barycentric interpolation across triangle faces.
+
 In addition, there is a fast visualization mode for quickly viewing the scene before path tracing. Instead of OpenGL draw, it uses single bounce ray tracing on CUDA, in order to ensure exact image pixel correspondence with path tracing.
 
 ## Performance
