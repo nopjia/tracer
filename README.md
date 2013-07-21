@@ -10,6 +10,6 @@ Advanced Rendering Seminar, University of Pennsylvania, Spring 2013
 * Specular Reflection
 * Fresnel Refraction
 * Anti-aliasing
-* Focal Blur
+* Depth of Field
 * Interactive Camera
 * Interactive Object Manipulation

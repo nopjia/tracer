@@ -23,14 +23,17 @@ object picking / moving
 
 -----
 
+focal blur - seems to be more vertical
+- when swap A and B result different
+- same for PIX_JITTER
+- seeing double vision instead of blur
+- but only for diffuse bounces, blur seems fine for emissive objects
+
 over time performance worsens
 
 ~9500 iterations, film dies, no more accum
 
 stream compaction?
-
-focal blur - seems to be more vertical
-- when swap A and B result different
 
 fix fresnel for cubes
 - EPS problem?

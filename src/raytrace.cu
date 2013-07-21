@@ -44,7 +44,6 @@ __global__ void raytraceKernel(
 
   glm::vec3 lightDir(0.267261, 0.801784, 0.534522);
   Ray::Hit hit = Ray::intersectScene(ray, scene, sceneSize);
-  //Ray::Hit hit = Ray::intersect(ray, *scene[0].m_mesh);
 
   glm::vec3 col;
   if (hit.m_id < 0) {
@@ -90,9 +89,9 @@ __global__ void initBuffersKernel(
   // focal blur
 #ifdef FOCAL_BLUR
   glm::vec3 fpt = focalDist*rays[idx].m_dir+rays[idx].m_pos;
-  //glm::vec2 randdisk = lensRadius*Utils::randPointDisk(rand[idx].x,rand[idx].y,rand[idx].z);
-  glm::vec2 randdisk = lensRadius*glm::vec2(rand[idx])*2.0f - 1.0f;
-  rays[idx].m_pos += randdisk.x*glm::normalize(A) + randdisk.y*glm::normalize(B);
+  glm::vec2 randdisk = lensRadius*Utils::randPointDisk(rand[idx].x,rand[idx].y,rand[idx].z);
+  //glm::vec2 randdisk = lensRadius*glm::vec2(rand[idx])*2.0f - 1.0f;
+  rays[idx].m_pos += randdisk.y*glm::normalize(A) + randdisk.x*glm::normalize(B);
   rays[idx].m_dir = glm::normalize(fpt-rays[idx].m_pos);
 #endif
 
@@ -103,6 +102,11 @@ __global__ void initBuffersKernel(
 
   if (filmIters==1)
     film[idx] = glm::vec3(0.0f);
+
+  // testrand
+  //col[idx] = glm::vec3(0.0f);
+  //if (glm::distance(randdisk, (uv-0.5f)*4.0f) < 0.1f)
+  //  film[idx] += glm::vec3(1.0f);
 }
 
 __global__ void calcColorKernel(
@@ -151,8 +155,9 @@ __global__ void calcColorKernel(
 
   col[idx] *= scene[hit.m_id].m_material.m_color;
 
-  // cycle thru rand array with depth
-  uint randidx = (idx + depth) % (size);
+  // arbitrarily cycle thru rand array with ray data
+  // WARNING: randVectorHem is bad, need real random seeds
+  uint randidx = (idx + (int)glm::dot(rays[idx].m_dir, rays[idx].m_pos)) % (size);
   rays[idx].m_dir = Material::bounce(scene[hit.m_id].m_material,
     rays[idx].m_dir, hit.m_nor, rand[randidx]);
 
@@ -166,6 +171,9 @@ __global__ void accumColorKernel(
   glm::vec3* film, const float filmIters)
 {
   uint idx = blockIdx.x*blockDim.x + threadIdx.x;
+
+  //pbo_out[idx] = rgbToInt(film[idx]);
+  //return;
 
   film[idx] += col[idx];
 

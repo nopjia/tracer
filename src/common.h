@@ -38,13 +38,13 @@ typedef unsigned int uint;
 
 // rendering constants
 #define FOV 30
-#define PATH_DEPTH 2
+#define PATH_DEPTH 5
 
 // options
 #define TRI_NORM_INTERP
 #define GAMMA_CORRECT
 #define PIX_JITTER
-#define FOCAL_BLUR
+//#define FOCAL_BLUR
 #define BACKFACE_CULL
 
 
