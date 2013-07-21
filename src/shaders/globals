@@ -1,8 +1,8 @@
 #version 420 core
 
 // constants
-#define WINDOW_W 640
-#define WINDOW_H 480
+#define WINDOW_W 512
+#define WINDOW_H 512
 
 // Vertex attribute indexes
 #define POSITION_ATTR                     0
