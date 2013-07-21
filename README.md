@@ -3,7 +3,7 @@ CUDA Path Tracer
 
 Advanced Rendering Seminar, University of Pennsylvania, Spring 2013
 
-# Features
+## Features
 
 * Diffuse Shading
 * Diffuse Reflection
@@ -14,7 +14,7 @@ Advanced Rendering Seminar, University of Pennsylvania, Spring 2013
 * Interactive Camera
 * Interactive Object Manipulation
 
-# Controls
+## Controls
 
 Camera Controls
 
